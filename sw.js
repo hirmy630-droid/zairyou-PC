@@ -1,8 +1,8 @@
-const CACHE_NAME = 'zairyo-pc-pwa-v4';
+const CACHE_NAME = 'zairyo-pc-mac-pwa-v20260928-03';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest',
+  './manifest.json',
   './sw.js'
 ];
 
@@ -36,7 +36,7 @@ function isCriticalAsset(request) {
   const url = new URL(request.url);
   return isSameOrigin(request) && (
     url.pathname.endsWith('/index.html') ||
-    url.pathname.endsWith('/manifest.webmanifest') ||
+    url.pathname.endsWith('/manifest.json') ||
     url.pathname.endsWith('/sw.js')
   );
 }

@@ -1,8 +1,8 @@
 {
   "id": "zairyo-pc-mac-v1",
-  "name": "材料取り 計算",
-  "short_name": "材料PC",
-  "description": "材料取り 計算 PWA",
+  "name": "材料取り・勾配計算",
+  "short_name": "材料・勾配PC",
+  "description": "材料取り・勾配計算 for Mac PWA",
   "lang": "ja",
   "start_url": "./index.html?pwa=1",
   "scope": "./",
@@ -11,43 +11,25 @@
     "standalone",
     "minimal-ui"
   ],
-  "orientation": "portrait",
-  "background_color": "#0b0b0f",
-  "theme_color": "#0b0b0f",
+  "orientation": "any",
+  "background_color": "#121214",
+  "theme_color": "#121214",
   "icons": [
     {
-      "src": "icon-180.png",
+      "src": "./icon-180.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icon-1024.png",
-      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     }

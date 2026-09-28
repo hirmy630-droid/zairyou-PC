@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>材料取り 計算 for Mac</title>
+    <title>材料取り・勾配計算 for Mac</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,6 +11,11 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontSize: {
+                        xs: ['14px', '1.4'],
+                        sm: ['15px', '1.4'],
+                        base: ['16px', '1.5']
+                    },
                     colors: {
                         mac: {
                             base: '#161618',
@@ -36,8 +41,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap');
@@ -58,6 +61,20 @@
             -webkit-user-select: text;
         }
 
+        /* 数値入力スピンボタンの非表示化 */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        html, body, input, button, select, textarea {
+            font-size: 14px;
+        }
+
         body {
             font-family: var(--mac-font);
             background-color: #121214;
@@ -67,6 +84,16 @@
             letter-spacing: -0.01em;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 14px未満のスタイルをすべて最低14pxに強制設定 */
+        .text-xs,
+        [class*="text-[10px]"],
+        [class*="text-[11px]"],
+        [class*="text-[12px]"],
+        [class*="text-[13px]"] {
+            font-size: 14px !important;
+            line-height: 1.4 !important;
         }
 
         /* macOS Custom Thin Scrollbars */
@@ -94,7 +121,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             padding: 6px 14px;
             border-radius: 8px;
@@ -171,20 +198,25 @@
             background: #18181b;
         }
 
-        /* Keyboard Shortcut Badges (macOS style) */
+        /* Keyboard Shortcut Badges */
         .kbd-badge {
             font-family: var(--mac-mono);
-            font-size: 10px;
+            font-size: 14px !important;
             font-weight: 700;
-            padding: 2px 5px;
+            padding: 2px 6px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 4px;
-            color: #a1a1aa;
-            line-height: 1;
+            color: #d4d4d8;
+            line-height: 1.2;
         }
 
-        /* Print styles for Mac cmd+P output */
+        /* テーブル線定義 */
+        .result-table th, .result-table td {
+            border: 1px solid #2c2c2e;
+        }
+
+        /* Print styles */
         @media print {
             body {
                 background: white !important;
@@ -207,6 +239,12 @@
             }
         }
     </style>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-180.png">
+    <meta name="theme-color" content="#121214">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body class="flex flex-col h-screen select-none">
     <div id="root" class="flex flex-col flex-1 h-full overflow-hidden"></div>
@@ -230,12 +268,14 @@
         };
         const excelMod = (n, d) => d === 0 ? 0 : n - d * Math.floor(n / d);
 
-        const APPS = ['calc', 'alloc', 'tightframe', 'kanamono'];
+        // 5つのアプリ（タブ）定義
+        const APPS = ['calc', 'alloc', 'tightframe', 'kanamono', 'slope'];
         const APP_NAMES = {
             'calc': '役物 (板金)',
             'alloc': '材料割付',
             'tightframe': '屋根タイト',
-            'kanamono': '金物割付'
+            'kanamono': '金物割付',
+            'slope': '勾配計算'
         };
 
         const Icon = ({ name, size = 18, className = "" }) => {
@@ -265,19 +305,19 @@
                         <line x1="40" y1="20" x2="610" y2="20" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="40" y1="15" x2="40" y2="25" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="610" y1="15" x2="610" y2="25" stroke="#8e8e93" strokeWidth="1" />
-                        <text x="325" y="15" fill="#8e8e93" fontSize="13" fontWeight="bold" textAnchor="middle">600</text>
+                        <text x="325" y="15" fill="#8e8e93" fontSize="14" fontWeight="bold" textAnchor="middle">600</text>
                         <line x1="40" y1="40" x2="230" y2="40" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="230" y1="40" x2="420" y2="40" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="420" y1="40" x2="610" y2="40" stroke="#8e8e93" strokeWidth="1" />
-                        <text x="135" y="35" fill="#8e8e93" fontSize="11" textAnchor="middle">200</text>
-                        <text x="325" y="35" fill="#8e8e93" fontSize="11" textAnchor="middle">200</text>
-                        <text x="515" y="35" fill="#8e8e93" fontSize="11" textAnchor="middle">200</text>
+                        <text x="135" y="35" fill="#8e8e93" fontSize="14" textAnchor="middle">200</text>
+                        <text x="325" y="35" fill="#8e8e93" fontSize="14" textAnchor="middle">200</text>
+                        <text x="515" y="35" fill="#8e8e93" fontSize="14" textAnchor="middle">200</text>
                         <polyline points="10,80 20,50 60,50 115,140 155,140 210,50 250,50 305,140 345,140 400,50 440,50 495,140 535,140 590,50 630,50 640,80" fill="none" stroke="#f97316" strokeWidth="3" strokeLinejoin="round" />
                         <line x1="40" y1="45" x2="40" y2="80" stroke="#8e8e93" strokeWidth="1" strokeDasharray="3,3" />
-                        <text x="40" y="95" fill="#8e8e93" fontSize="11" textAnchor="middle">33.5</text>
-                        <text x="135" y="160" fill="#8e8e93" fontSize="11" textAnchor="middle">35</text>
-                        <text x="325" y="160" fill="#8e8e93" fontSize="11" textAnchor="middle">35</text>
-                        <text x="515" y="160" fill="#8e8e93" fontSize="11" textAnchor="middle">35</text>
+                        <text x="40" y="98" fill="#8e8e93" fontSize="14" textAnchor="middle">33.5</text>
+                        <text x="135" y="162" fill="#8e8e93" fontSize="14" textAnchor="middle">35</text>
+                        <text x="325" y="162" fill="#8e8e93" fontSize="14" textAnchor="middle">35</text>
+                        <text x="515" y="162" fill="#8e8e93" fontSize="14" textAnchor="middle">35</text>
                     </svg>
                 );
             } else if (size === '500') {
@@ -286,11 +326,11 @@
                         <line x1="30" y1="20" x2="530" y2="20" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="30" y1="15" x2="30" y2="25" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="530" y1="15" x2="530" y2="25" stroke="#8e8e93" strokeWidth="1" />
-                        <text x="280" y="15" fill="#8e8e93" fontSize="13" fontWeight="bold" textAnchor="middle">500</text>
+                        <text x="280" y="15" fill="#8e8e93" fontSize="14" fontWeight="bold" textAnchor="middle">500</text>
                         <line x1="30" y1="200" x2="280" y2="200" stroke="#8e8e93" strokeWidth="1" />
                         <line x1="280" y1="200" x2="530" y2="200" stroke="#8e8e93" strokeWidth="1" />
-                        <text x="155" y="215" fill="#8e8e93" fontSize="11" textAnchor="middle">250</text>
-                        <text x="405" y="215" fill="#8e8e93" fontSize="11" textAnchor="middle">250</text>
+                        <text x="155" y="215" fill="#8e8e93" fontSize="14" textAnchor="middle">250</text>
+                        <text x="405" y="215" fill="#8e8e93" fontSize="14" textAnchor="middle">250</text>
                         <polyline points="15,60 20,40 60,40 135,170 175,170 260,40 300,40 375,170 415,170 500,40 540,40 545,60" fill="none" stroke="#0a84ff" strokeWidth="3" strokeLinejoin="round" />
                     </svg>
                 );
@@ -298,7 +338,7 @@
                 return (
                     <svg viewBox="0 0 540 220" className="w-full h-auto max-h-[140px] text-white drop-shadow-md">
                         <line x1="40" y1="20" x2="500" y2="20" stroke="#8e8e93" strokeWidth="1" />
-                        <text x="270" y="15" fill="#8e8e93" fontSize="13" fontWeight="bold" textAnchor="middle">500</text>
+                        <text x="270" y="15" fill="#8e8e93" fontSize="14" fontWeight="bold" textAnchor="middle">500</text>
                         <polyline points="20,70 30,50 45,50 45,70 70,70 160,190 380,190 470,70 510,70 510,50 490,50 490,80" fill="none" stroke="#30d158" strokeWidth="3" strokeLinejoin="round" />
                     </svg>
                 );
@@ -332,7 +372,14 @@
             const kanamonoLengthRef = useRef(null);
             const tfTotalLRef = useRef(null);
 
-            // States
+            // 勾配計算用 Refs
+            const slopeL1Ref = useRef(null);
+            const slopeL2Ref = useRef(null);
+            const slopeWRef = useRef(null);
+            const slopePitchRef = useRef(null);
+            const slopeCanvasRef = useRef(null);
+
+            // States (役物・割付・タイト・金物)
             const [currentProductName, setCurrentProductName] = useState(() => localStorage.getItem('productName') || '');
             const [stdLength, setStdLength] = useState(() => localStorage.getItem('stdLength') || '3000');
             const [overlap, setOverlap] = useState(() => localStorage.getItem('overlap') || '50');
@@ -363,19 +410,58 @@
             const [isClearModalOpen, setIsClearModalOpen] = useState(false);
             const [toastMsg, setToastMsg] = useState('');
 
+            // 勾配計算用 States
+            const slopeStored = getStored('slope_calc_mac_state', { L1: '', L2: '', W: '', Pitch: '' });
+            const [slopeL1, setSlopeL1] = useState(slopeStored.L1 || '');
+            const [slopeL2, setSlopeL2] = useState(slopeStored.L2 || '');
+            const [slopeW, setSlopeW] = useState(slopeStored.W || '');
+            const [slopePitch, setSlopePitch] = useState(slopeStored.Pitch || '');
+            const [slopeZoomImg, setSlopeZoomImg] = useState(null);
+
             const showToast = useCallback((msg) => {
                 setToastMsg(msg);
-                setTimeout(() => setToastMsg(''), 2000);
+                setTimeout(() => setToastMsg(''), 2500);
             }, []);
 
             const copyToClipboard = useCallback((text, label = "計算結果") => {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast(`${label}をクリップボードにコピーしました`);
-                }).catch(() => {
-                    showToast('コピーに失敗しました');
-                });
+                const fallbackCopy = (str) => {
+                    const el = document.createElement('textarea');
+                    el.value = str;
+                    el.style.position = 'fixed';
+                    el.style.left = '-9999px';
+                    document.body.appendChild(el);
+                    el.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast(`${label}をクリップボードにコピーしました`);
+                    } catch (e) {
+                        showToast('コピーに失敗しました');
+                    }
+                    document.body.removeChild(el);
+                };
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast(`${label}をクリップボードにコピーしました`);
+                    }).catch(() => fallbackCopy(text));
+                } else {
+                    fallbackCopy(text);
+                }
             }, [showToast]);
 
+            // タブの記憶
+            useEffect(() => {
+                localStorage.setItem('mac_activeApp', activeApp);
+            }, [activeApp]);
+
+            // 勾配計算のState保存
+            useEffect(() => {
+                localStorage.setItem('slope_calc_mac_state', JSON.stringify({
+                    L1: slopeL1, L2: slopeL2, W: slopeW, Pitch: slopePitch
+                }));
+            }, [slopeL1, slopeL2, slopeW, slopePitch]);
+
+            // 役物計算
             const materialResult = useMemo(() => {
                 const total = toNum(totalDim), std = toNum(stdLength), over = toNum(overlap), effective = std - over;
                 if (total > 0 && effective > 0) {
@@ -396,6 +482,7 @@
                 return summary;
             }, [history]);
 
+            // 材料割付計算
             const allocCalculated = useMemo(() => {
                 const L = toNum(allocW), W = toNum(allocPitch), N = toNum(allocCount);
                 let pitchMode = { q: '-', qRem: '-' }, countMode = { w: '-', wRem: '-' };
@@ -405,15 +492,6 @@
                 }
                 return { pitchMode, countMode };
             }, [allocW, allocPitch, allocCount]);
-
-            const allocTotals = useMemo(() => {
-                return allocHistory.reduce((acc, item) => {
-                    const qVal = parseInt(unformat(item.q)) || 0;
-                    if (item.source === 'pitch') acc.pitchQ += qVal;
-                    else if (item.source === 'count') acc.countQ += qVal;
-                    return acc;
-                }, { pitchQ: 0, countQ: 0 });
-            }, [allocHistory]);
 
             const allocSummaryByMemo = useMemo(() => {
                 const summary = {};
@@ -427,6 +505,7 @@
                 return summary;
             }, [allocHistory]);
 
+            // 金物割付計算
             const kanamonoResults = useMemo(() => {
                 const L = toNum(kanaLength), W = toNum(kanaPitch), N = toNum(kanaCount);
                 let resQ = { val: '-', rem: '-' }, resW = { val: '-', rem: '-' };
@@ -448,6 +527,7 @@
                 return rows;
             }, [kanaLength, kanaPitch, kanaCount, kanamonoResults]);
 
+            // タイトフレーム計算
             const tfResults = useMemo(() => {
                 const size = parseInt(tfSize) || 600; const L = toNum(tfTotalL); let yamaDim = 0, taniDim = 0, calcSize = size;
                 if (size === 600) { yamaDim = 200; taniDim = 100; calcSize = 600; }
@@ -463,6 +543,211 @@
                 const roofTaniCount = Math.ceil((L + taniDim) / calcSize), roofYamaCount = Math.ceil(L / calcSize);
                 return { centerL, yamaDim, taniDim, taniZan, yamaZan, table, count, roofTaniCount, roofYamaCount, L };
             }, [tfSize, tfTotalL]);
+
+            // 勾配計算ロジック
+            const slopeCalculated = useMemo(() => {
+                const a = toNum(slopeL1);
+                const c = toNum(slopeL2);
+                const b = toNum(slopeW);
+                const interval = toNum(slopePitch);
+
+                if (b <= 0 || interval <= 0) {
+                    return { isValid: false, count: 0, newB: 0, newC: 0, step: 0, table: [], scrapW: 0, scrapL: 0, a, b, c, interval };
+                }
+
+                const count = Math.ceil(b / interval);
+                const newB = count * interval;
+                const slope = (c - a) / b;
+                const newC = a + (slope * newB);
+                const step = slope * interval;
+
+                const table = [];
+                for (let i = 0; i <= count; i++) {
+                    const dist = i * interval;
+                    const height = a + (slope * dist);
+                    table.push({ no: i, dist, height });
+                }
+
+                const scrapW = newB - b;
+                const scrapL = newC - c;
+
+                return {
+                    isValid: true, count, newB, newC, step, table, scrapW, scrapL, a, b, c, interval
+                };
+            }, [slopeL1, slopeL2, slopeW, slopePitch]);
+
+            // 勾配 Canvas描画関数
+            const drawSlopeCanvas = useCallback(() => {
+                const canvas = slopeCanvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const container = canvas.parentElement;
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+                ctx.clearRect(0, 0, rect.width, rect.height);
+
+                const { isValid, a, b: origB, c: origC, newB, newC, count, interval } = slopeCalculated;
+                if (!isValid) return;
+
+                const padding = { l: 45, r: 45, t: 35, b: 45 };
+                const drawW = rect.width - (padding.l + padding.r);
+                const drawH = rect.height - (padding.t + padding.b);
+                const scaleX = drawW / (newB || 1);
+                const maxHeight = Math.max(a, newC, origC);
+                const scaleY = drawH / (maxHeight || 1);
+
+                const tx = (x) => padding.l + x * scaleX;
+                const ty = (y) => rect.height - padding.b - y * scaleY;
+
+                // 背景グリッド
+                ctx.beginPath();
+                ctx.strokeStyle = '#222226';
+                ctx.lineWidth = 1;
+                for (let j = 0; j <= maxHeight; j += (maxHeight / 4 || 1)) {
+                    if (j === 0) continue;
+                    ctx.moveTo(tx(0), ty(j));
+                    ctx.lineTo(tx(newB), ty(j));
+                }
+                ctx.stroke();
+
+                // 底辺
+                ctx.beginPath();
+                ctx.strokeStyle = '#0a84ff';
+                ctx.lineWidth = 2;
+                ctx.moveTo(tx(0), ty(0));
+                ctx.lineTo(tx(newB), ty(0));
+                ctx.stroke();
+
+                // ピッチ線
+                for (let i = 1; i < count; i++) {
+                    const cx = i * interval;
+                    const cy = a + ((newC - a) / newB) * cx;
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#bf5af2';
+                    ctx.lineWidth = 1;
+                    ctx.globalAlpha = 0.4;
+                    ctx.moveTo(tx(cx), ty(0));
+                    ctx.lineTo(tx(cx), ty(cy));
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
+                }
+
+                // 元寸法ライン（破線）
+                if (origB > 0 && origB !== newB) {
+                    ctx.setLineDash([4, 3]);
+                    ctx.strokeStyle = '#ff453a';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(tx(origB), ty(0));
+                    ctx.lineTo(tx(origB), ty(origC));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.font = "bold 14px -apple-system, sans-serif";
+                    ctx.fillStyle = "#ff453a";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`実寸L2: ${Math.round(origC)}`, tx(origB), ty(0) + 20);
+                }
+
+                // 基準側(L1)・延長側(L2)の垂直線
+                ctx.beginPath();
+                ctx.strokeStyle = '#30d158';
+                ctx.lineWidth = 2.5;
+                ctx.moveTo(tx(0), ty(0));
+                ctx.lineTo(tx(0), ty(a));
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#30d158';
+                ctx.lineWidth = 2.5;
+                ctx.moveTo(tx(newB), ty(0));
+                ctx.lineTo(tx(newB), ty(newC));
+                ctx.stroke();
+
+                // 斜辺 (屋根勾配面)
+                ctx.beginPath();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.moveTo(tx(0), ty(a));
+                ctx.lineTo(tx(newB), ty(newC));
+                ctx.stroke();
+
+                // 数値ラベル
+                ctx.font = "bold 14px -apple-system, sans-serif";
+                ctx.fillStyle = "#30d158";
+                ctx.textAlign = "center";
+                ctx.fillText(`L1: ${Math.round(a)}`, tx(0), ty(a) - 10);
+                ctx.fillText(`延長L2: ${Math.round(newC)}`, tx(newB), ty(newC) - 10);
+
+                ctx.fillStyle = "#0a84ff";
+                ctx.fillText(`W(設計): ${Math.round(origB)}`, tx(origB / 2), ty(0) + 20);
+
+                if (origB !== newB && newB > 0) {
+                    ctx.fillStyle = "#8e8e93";
+                    ctx.font = "bold 14px -apple-system, sans-serif";
+                    ctx.fillText(`全体幅: ${Math.round(newB)} (端材 ${Math.round(newB - origB)})`, tx(newB / 2), ty(0) + 36);
+                }
+            }, [slopeCalculated]);
+
+            useEffect(() => {
+                if (activeApp === 'slope') {
+                    // 少し遅延させて確実に親コンテナサイズを取得
+                    const timer = setTimeout(drawSlopeCanvas, 50);
+                    window.addEventListener('resize', drawSlopeCanvas);
+                    return () => {
+                        clearTimeout(timer);
+                        window.removeEventListener('resize', drawSlopeCanvas);
+                    };
+                }
+            }, [activeApp, drawSlopeCanvas]);
+
+            // 勾配計算結果テキストのコピー
+            const copySlopeResults = () => {
+                if (!slopeCalculated.isValid) {
+                    showToast('計算寸法を入力してください');
+                    return;
+                }
+                const { a, origB, origC, interval, newB, newC, count, step, table } = slopeCalculated;
+                const lines = [
+                    '【勾配 寸法計算結果】',
+                    `基準側 L1: ${a} mm`,
+                    `延長側 L2: ${toNum(slopeL2)} mm`,
+                    `全体の幅 W: ${toNum(slopeW)} mm`,
+                    `働き幅 ＠: ${interval} mm`,
+                    '------------------------',
+                    `延長後の幅: ${Math.round(newB).toLocaleString()} mm`,
+                    `延長後のL2: ${Math.round(newC).toLocaleString()} mm`,
+                    `総枚数: ${count} 枚`,
+                    `増分 (1枚あたり): ${Math.round(Math.abs(step)).toLocaleString()} mm`,
+                    '------------------------',
+                    '【寸法詳細】'
+                ];
+                table.forEach(r => {
+                    lines.push(`No.${r.no} | 働き幅: ${Math.round(r.dist).toLocaleString()} mm | 長さ: ${Math.round(r.height).toLocaleString()} mm`);
+                });
+                lines.push(`端材 | 働き端材: ${Math.round(slopeCalculated.scrapW).toLocaleString()} mm | 長さ端材: ${Math.round(slopeCalculated.scrapL).toLocaleString()} mm`);
+
+                copyToClipboard(lines.join('\n'), '勾配寸法計算結果');
+            };
+
+            const resetSlopeInputs = () => {
+                setSlopeL1('');
+                setSlopeL2('');
+                setSlopeW('');
+                setSlopePitch('');
+                showToast('勾配の入力をクリアしました');
+            };
+
+            const openSlopeZoomModal = () => {
+                const canvas = slopeCanvasRef.current;
+                if (!canvas || canvas.width === 0) return;
+                setSlopeZoomImg(canvas.toDataURL('image/png'));
+            };
 
             const addValue = () => {
                 const val = toNum(calcInput);
@@ -509,13 +794,19 @@
                 showToast('材料割付の履歴を保存しました');
             };
 
+            // キーボードショートカット (⌘1〜⌘5、⌘S、Esc)
             useEffect(() => {
                 const handleKeyDown = (e) => {
                     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
                     const cmdKey = isMac ? e.metaKey : e.ctrlKey;
 
+                    if (e.key === 'Escape') {
+                        if (slopeZoomImg) setSlopeZoomImg(null);
+                        if (isClearModalOpen) setIsClearModalOpen(false);
+                    }
+
                     if (cmdKey && !e.shiftKey && !e.altKey) {
-                        // Switch Tabs ⌘1 to ⌘4
+                        // Switch Tabs ⌘1 to ⌘5
                         const num = parseInt(e.key);
                         if (num >= 1 && num <= APPS.length) {
                             e.preventDefault();
@@ -527,6 +818,7 @@
                             e.preventDefault();
                             if (activeApp === 'calc') saveToHistoryManually();
                             else if (activeApp === 'alloc') saveAllocHistory();
+                            else if (activeApp === 'slope') copySlopeResults();
                             return;
                         }
                         // ⌘P: Native print
@@ -538,7 +830,7 @@
 
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [activeApp, totalDim, currentProductName, stdLength, overlap, materialResult, allocW, allocSource, allocPitch, allocCount, allocCalculated]);
+            }, [activeApp, totalDim, currentProductName, stdLength, overlap, materialResult, allocW, allocSource, allocPitch, allocCount, allocCalculated, slopeCalculated, slopeZoomImg, isClearModalOpen]);
 
             return (
                 <div className="flex flex-col h-full bg-[#121214] text-zinc-100 select-none overflow-hidden">
@@ -564,7 +856,7 @@
                             </h1>
                         </div>
 
-                        {/* macOS Segmented Tab Navigation with Shortcuts */}
+                        {/* macOS Segmented Tab Navigation with Shortcuts (⌘1〜⌘5) */}
                         <div className="flex items-center bg-[#121214] p-1 rounded-lg border border-white/10 shadow-inner">
                             {APPS.map((app, idx) => (
                                 <button
@@ -579,6 +871,11 @@
                         </div>
 
                         <div className="flex items-center gap-2">
+                            {activeApp === 'slope' && (
+                                <button onClick={copySlopeResults} className="mac-btn mac-btn-blue !py-1 !px-2.5 text-xs text-white gap-1.5" title="結果をクリップボードにコピー">
+                                    <Icon name="copy" size={14} /> 結果コピー
+                                </button>
+                            )}
                             <button onClick={() => window.print()} className="mac-btn !py-1 !px-2.5 text-xs text-zinc-300 gap-1.5" title="印刷 / PDF保存 (⌘P)">
                                 <Icon name="print" size={14} /> 印刷
                             </button>
@@ -588,7 +885,7 @@
                     {/* Main Workspace Area */}
                     <main className="flex-1 p-5 overflow-hidden">
                         <div className="h-full w-full max-w-[1500px] mx-auto">
-                            {}
+                            {/* 1. 役物 (板金) */}
                             {activeApp === 'calc' && (
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
@@ -708,7 +1005,7 @@
                                 </div>
                             )}
 
-                            {}
+                            {/* 2. 材料割付 */}
                             {activeApp === 'alloc' && (
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
@@ -834,7 +1131,7 @@
                                 </div>
                             )}
 
-                            {}
+                            {/* 3. 屋根タイト */}
                             {activeApp === 'tightframe' && (
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
@@ -913,7 +1210,7 @@
                                 </div>
                             )}
 
-                            {}
+                            {/* 4. 金物割付 */}
                             {activeApp === 'kanamono' && (
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
@@ -981,8 +1278,162 @@
                                     </div>
                                 </div>
                             )}
+
+                            {/* 5. 勾配計算 (追加タブ) */}
+                            {activeApp === 'slope' && (
+                                <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
+                                    {/* 左側：入力 & サマリー & Canvas */}
+                                    <div className="col-span-7 flex flex-col gap-4 overflow-y-auto pr-1">
+                                        <div className="mac-card p-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">設計寸法 入力</div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[11px] text-zinc-500">Tabで次へ移動 / 即時計算</span>
+                                                    <button onClick={resetSlopeInputs} className="mac-btn mac-btn-red !py-0.5 !px-2 text-xs">クリア</button>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {/* 基準側 L1 */}
+                                                <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#30d158] transition-all">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="text-xs font-bold text-[#30d158]">基準側 L1 (mm)</label>
+                                                        {slopeL1 && <button onClick={() => setSlopeL1('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
+                                                    </div>
+                                                    <input ref={slopeL1Ref} type="number" step="any" min="0" placeholder="0" value={slopeL1} onFocus={handleFocus} onChange={(e) => setSlopeL1(e.target.value)} onKeyDown={(e) => handleEnterKey(e, slopeL2Ref)} className="w-full bg-transparent text-xl font-bold font-mono text-white text-right focus:outline-none" />
+                                                </div>
+
+                                                {/* 延長側 L2 */}
+                                                <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#30d158] transition-all">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="text-xs font-bold text-[#30d158]">延長側 L2 (mm)</label>
+                                                        {slopeL2 && <button onClick={() => setSlopeL2('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
+                                                    </div>
+                                                    <input ref={slopeL2Ref} type="number" step="any" min="0" placeholder="0" value={slopeL2} onFocus={handleFocus} onChange={(e) => setSlopeL2(e.target.value)} onKeyDown={(e) => handleEnterKey(e, slopeWRef)} className="w-full bg-transparent text-xl font-bold font-mono text-white text-right focus:outline-none" />
+                                                </div>
+
+                                                {/* 全体の幅 W */}
+                                                <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#0a84ff] transition-all">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="text-xs font-bold text-[#0a84ff]">全体の幅 W (mm)</label>
+                                                        {slopeW && <button onClick={() => setSlopeW('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
+                                                    </div>
+                                                    <input ref={slopeWRef} type="number" step="any" min="0" placeholder="0" value={slopeW} onFocus={handleFocus} onChange={(e) => setSlopeW(e.target.value)} onKeyDown={(e) => handleEnterKey(e, slopePitchRef)} className="w-full bg-transparent text-xl font-bold font-mono text-white text-right focus:outline-none" />
+                                                </div>
+
+                                                {/* 働き幅 ＠ */}
+                                                <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#bf5af2] transition-all">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <label className="text-xs font-bold text-[#bf5af2]">働き幅 ＠ (mm)</label>
+                                                        {slopePitch && <button onClick={() => setSlopePitch('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
+                                                    </div>
+                                                    <input ref={slopePitchRef} type="number" step="any" min="0" placeholder="0" value={slopePitch} onFocus={handleFocus} onChange={(e) => setSlopePitch(e.target.value)} className="w-full bg-transparent text-xl font-bold font-mono text-white text-right focus:outline-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 計算結果サマリー */}
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <div className="mac-card p-3 text-center border-b-2 border-b-[#0a84ff]">
+                                                <span className="block text-[11px] font-bold text-[#0a84ff] mb-1">延長後の幅</span>
+                                                <span className="text-xl font-mono font-bold text-white">{slopeCalculated.isValid ? Math.round(slopeCalculated.newB).toLocaleString() : '-'}</span>
+                                            </div>
+                                            <div className="mac-card p-3 text-center border-b-2 border-b-[#30d158]">
+                                                <span className="block text-[11px] font-bold text-[#30d158] mb-1">延長後のL2</span>
+                                                <span className="text-xl font-mono font-bold text-white">{slopeCalculated.isValid ? Math.round(slopeCalculated.newC).toLocaleString() : '-'}</span>
+                                            </div>
+                                            <div className="mac-card p-3 text-center border-b-2 border-b-[#f97316]">
+                                                <span className="block text-[11px] font-bold text-[#f97316] mb-1">総枚数</span>
+                                                <span className="text-xl font-mono font-bold text-white">{slopeCalculated.isValid ? `${slopeCalculated.count}枚` : '-'}</span>
+                                            </div>
+                                            <div className="mac-card p-3 text-center border-b-2 border-b-[#bf5af2]">
+                                                <span className="block text-[11px] font-bold text-[#bf5af2] mb-1">増分 (1枚あたり)</span>
+                                                <span className="text-xl font-mono font-bold text-white">{slopeCalculated.isValid ? Math.round(Math.abs(slopeCalculated.step)).toLocaleString() : '-'}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* 勾配 断面形状図 Canvas */}
+                                        <div className="mac-card p-4 flex flex-col">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">勾配 断面形状図</span>
+                                                <span className="text-[11px] text-zinc-500">クリックで拡大プレビュー</span>
+                                            </div>
+                                            <div className="w-full bg-[#121214] border border-[#2c2c2e] rounded-lg aspect-[16/9] overflow-hidden cursor-pointer relative" onClick={openSlopeZoomModal}>
+                                                <canvas ref={slopeCanvasRef} className="w-full h-full block"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 右側：各ピッチ寸法詳細テーブル */}
+                                    <div className="col-span-5 mac-card flex flex-col overflow-hidden h-full">
+                                        <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/60 shrink-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">各ピッチ寸法詳細</span>
+                                                <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">{slopeCalculated.isValid ? `${slopeCalculated.count}枚` : '0枚'}</span>
+                                            </div>
+                                            <span className="text-xs text-zinc-500 font-mono">単位: mm</span>
+                                        </div>
+
+                                        <div className="flex-1 overflow-y-auto">
+                                            <table className="result-table w-full border-collapse bg-[#121214] text-sm">
+                                                <thead className="sticky top-0 bg-[#242426] z-10 font-mono text-xs">
+                                                    <tr>
+                                                        <th className="w-14 text-orange-400 py-2.5 font-bold">No.</th>
+                                                        <th className="text-blue-400 py-2.5 font-bold">働き幅累計</th>
+                                                        <th className="text-emerald-400 py-2.5 font-bold">屋根長さ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="font-mono text-sm">
+                                                    {!slopeCalculated.isValid ? (
+                                                        <tr><td colSpan="3" className="py-24 text-center text-zinc-600 font-bold">数値を入力すると寸法表が表示されます</td></tr>
+                                                    ) : (
+                                                        <>
+                                                            {slopeCalculated.table.map(row => {
+                                                                const isStart = (row.no === 0);
+                                                                return (
+                                                                    <tr key={row.no} className="hover:bg-zinc-800/40 transition-colors">
+                                                                        <td className="text-center font-bold text-orange-400 py-2">{row.no}</td>
+                                                                        <td className={`text-center font-semibold py-2 ${isStart ? 'text-zinc-500' : 'text-blue-400'}`}>{Math.round(row.dist).toLocaleString()}</td>
+                                                                        <td className={`text-center font-bold text-base py-2 ${isStart ? 'text-zinc-500' : 'text-emerald-400'}`}>{Math.round(row.height).toLocaleString()}</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                            <tr className="bg-[#242426]">
+                                                                <td className="text-center font-bold text-zinc-400 py-2 text-xs">端材</td>
+                                                                <td className="text-center text-blue-400 py-2">
+                                                                    <span className="text-[10px] text-zinc-400 block font-sans">働き端材</span>
+                                                                    <span className="font-bold">{Math.round(slopeCalculated.scrapW).toLocaleString()}</span>
+                                                                </td>
+                                                                <td className="text-center text-emerald-400 py-2">
+                                                                    <span className="text-[10px] text-zinc-400 block font-sans">長さ端材</span>
+                                                                    <span className="font-bold text-base">{Math.round(slopeCalculated.scrapL).toLocaleString()}</span>
+                                                                </td>
+                                                            </tr>
+                                                        </>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </main>
+
+                    {/* 勾配 Canvas 拡大プレビュー用モーダル */}
+                    {slopeZoomImg && (
+                        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-md p-6" onClick={() => setSlopeZoomImg(null)}>
+                            <div className="relative max-w-5xl w-full max-h-[90vh] mac-card p-4 flex flex-col shadow-2xl border border-white/20 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-xs font-bold text-white uppercase tracking-wider">勾配 断面形状図 拡大プレビュー</span>
+                                    <button onClick={() => setSlopeZoomImg(null)} className="mac-btn !py-1 !px-2.5 text-xs text-zinc-400 hover:text-white">閉じる (Esc)</button>
+                                </div>
+                                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                                    <img src={slopeZoomImg} className="max-w-full max-h-[75vh] object-contain rounded-lg" alt="拡大プレビュー" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Clear Confirmation Modal */}
                     {isClearModalOpen && (
@@ -1008,6 +1459,17 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    console.log('ServiceWorker registration successful:', registration.scope);
+                }).catch((err) => {
+                    console.error('ServiceWorker registration failed:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>

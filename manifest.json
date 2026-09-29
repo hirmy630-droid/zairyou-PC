@@ -1,10 +1,10 @@
 {
-  "id": "app-zairyo-pc-mac-v202609290903",
+  "id": "app-zairyo-pc-mac-v20260929092926",
   "name": "材料取り・勾配計算",
   "short_name": "材料・勾配PC",
   "description": "材料取り・勾配計算 for Mac PWA",
   "lang": "ja",
-  "start_url": "./index.html?pwa=202609290903",
+  "start_url": "./index.html?pwa=20260929092926",
   "scope": "./",
   "display": "standalone",
   "display_override": [

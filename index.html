@@ -240,7 +240,7 @@
             }
         }
     </style>
-    <link rel="manifest" href="./manifest.json?v=202609290903">
+        <link rel="manifest" href="./manifest.json?v=20260929092926">
     <link rel="icon" type="image/png" href="./icon-192.png">
     <link rel="apple-touch-icon" href="./icon-180.png">
     <meta name="theme-color" content="#121214">
@@ -710,27 +710,24 @@
                     return;
                 }
                 const { a, origB, origC, interval, newB, newC, count, step, table } = slopeCalculated;
-                const lines = [
-                    '【勾配 寸法計算結果】',
-                    `基準側 L1: ${a} mm`,
-                    `延長側 L2: ${toNum(slopeL2)} mm`,
-                    `全体の幅 W: ${toNum(slopeW)} mm`,
-                    `働き幅 ＠: ${interval} mm`,
-                    '------------------------',
-                    `延長後の幅: ${Math.round(newB).toLocaleString()} mm`,
-                    `延長後のL2: ${Math.round(newC).toLocaleString()} mm`,
-                    `総枚数: ${count} 枚`,
-                    `増分 (1枚あたり): ${Math.round(Math.abs(step)).toLocaleString()} mm`,
-                    '------------------------',
-                    '【寸法詳細】'
-                ];
-                table.forEach(r => {
-                    lines.push(`No.${r.no} | 働き幅: ${Math.round(r.dist).toLocaleString()} mm | 長さ: ${Math.round(r.height).toLocaleString()} mm`);
-                });
-                lines.push(`端材 | 働き端材: ${Math.round(slopeCalculated.scrapW).toLocaleString()} mm | 長さ端材: ${Math.round(slopeCalculated.scrapL).toLocaleString()} mm`);
+                
+                // Modified lines.join to prevent syntax errors
+                const copyStr = '【勾配 寸法計算結果】\n' +
+                    `基準側 L1: ${a} mm\n` +
+                    `延長側 L2: ${toNum(slopeL2)} mm\n` +
+                    `全体の幅 W: ${toNum(slopeW)} mm\n` +
+                    `働き幅 ＠: ${interval} mm\n` +
+                    '------------------------\n' +
+                    `延長後の幅: ${Math.round(newB).toLocaleString()} mm\n` +
+                    `延長後のL2: ${Math.round(newC).toLocaleString()} mm\n` +
+                    `総枚数: ${count} 枚\n` +
+                    `増分 (1枚あたり): ${Math.round(Math.abs(step)).toLocaleString()} mm\n` +
+                    '------------------------\n' +
+                    '【寸法詳細】\n' +
+                    table.map(r => `No.${r.no} | 働き幅: ${Math.round(r.dist).toLocaleString()} mm | 長さ: ${Math.round(r.height).toLocaleString()} mm`).join('\n') +
+                    `\n端材 | 働き端材: ${Math.round(slopeCalculated.scrapW).toLocaleString()} mm | 長さ端材: ${Math.round(slopeCalculated.scrapL).toLocaleString()} mm`;
 
-                copyToClipboard(lines.join('
-'), '勾配寸法計算結果');
+                copyToClipboard(copyStr.replace(/\\n/g, '\n'), '勾配寸法計算結果');
             };
 
             const resetSlopeInputs = () => {
@@ -1076,7 +1073,7 @@
                                                 <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto">
                                                     {Object.entries(allocSummaryByMemo).map(([memo, data]) => (
                                                         <div key={memo} className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 flex justify-between items-center">
-                                                            <span className="font-semibold text-zinc-200 truncate pr-2">{memo}</span>
+                                                            <span className="font-semibold text-zinc-200 truncate pr-2">{name}</span>
                                                             <div className="text-right shrink-0 font-mono text-xs">
                                                                 {data.pitch > 0 && <span className="text-blue-400 font-bold mr-2">{format(data.pitch)}枚 (ピッチ)</span>}
                                                                 {data.count > 0 && <span className="text-emerald-400 font-bold">{format(data.count)}枚 (数量)</span>}
@@ -1455,10 +1452,10 @@
         root.render(<App />);
     </script>
     <script>
-        // PWAのアップデート検知と自動リロード
+                // PWAのアップデート検知と自動リロード
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v={version_string}').then((registration) => {
+                navigator.serviceWorker.register('./sw.js?v=20260929092926').then((registration) => {
                     registration.onupdatefound = () => {
                         const installingWorker = registration.installing;
                         if (!installingWorker) return;

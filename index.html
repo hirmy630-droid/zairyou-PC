@@ -52,8 +52,6 @@
 
         * {
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
         input, textarea, [contenteditable="true"] {
@@ -87,7 +85,6 @@
         }
 
         /* 14px未満のスタイルをすべて最低14pxに強制設定 */
-        .text-xs,
         [class*="text-[10px]"],
         [class*="text-[11px]"],
         [class*="text-[12px]"],
@@ -110,11 +107,6 @@
             border: 2px solid transparent;
             background-clip: content-box;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.32);
-            border: 2px solid transparent;
-            background-clip: content-box;
-        }
 
         /* macOS Control Button Style */
         .mac-btn {
@@ -132,11 +124,6 @@
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
-        .mac-btn:hover {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-0.5px);
-        }
         .mac-btn:active {
             transform: translateY(1px);
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -149,25 +136,39 @@
             color: #ffffff;
             box-shadow: 0 2px 6px rgba(234, 88, 12, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
-        .mac-btn-primary:hover {
-            background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%) !important;
-            box-shadow: 0 3px 8px rgba(234, 88, 12, 0.5);
-        }
-
+        
         .mac-btn-blue {
             background: linear-gradient(180deg, #0a84ff 0%, #0066cc 100%) !important;
             border-color: rgba(255, 255, 255, 0.25) !important;
             color: #ffffff;
             box-shadow: 0 2px 6px rgba(10, 132, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
-        .mac-btn-blue:hover {
-            background: linear-gradient(180deg, #2b95ff 0%, #0066cc 100%) !important;
-        }
 
         .mac-btn-red {
             background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%) !important;
             border-color: rgba(255, 255, 255, 0.25) !important;
             color: #ffffff;
+        }
+
+        /* Hover styles exclusively for devices that support hover */
+        @media (hover: hover) {
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.32);
+                border: 2px solid transparent;
+                background-clip: content-box;
+            }
+            .mac-btn:hover {
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+                border-color: rgba(255, 255, 255, 0.2);
+                transform: translateY(-0.5px);
+            }
+            .mac-btn-primary:hover {
+                background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%) !important;
+                box-shadow: 0 3px 8px rgba(234, 88, 12, 0.5);
+            }
+            .mac-btn-blue:hover {
+                background: linear-gradient(180deg, #2b95ff 0%, #0066cc 100%) !important;
+            }
         }
 
         /* macOS Modern Card */
@@ -239,7 +240,7 @@
             }
         }
     </style>
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./manifest.json?v=202609290903">
     <link rel="icon" type="image/png" href="./icon-192.png">
     <link rel="apple-touch-icon" href="./icon-180.png">
     <meta name="theme-color" content="#121214">
@@ -380,32 +381,28 @@
             const slopeCanvasRef = useRef(null);
 
             // States (役物・割付・タイト・金物)
-            const [currentProductName, setCurrentProductName] = useState(() => localStorage.getItem('productName') || '');
-            const [stdLength, setStdLength] = useState(() => localStorage.getItem('stdLength') || '3000');
-            const [overlap, setOverlap] = useState(() => localStorage.getItem('overlap') || '50');
-            const [totalDim, setTotalDim] = useState(() => localStorage.getItem('totalDim') || '');
-            const [cumulativeSum, setCumulativeSum] = useState(() => toNum(localStorage.getItem('cumulativeSum') || 0));
+            const [currentProductName, setCurrentProductName] = useState('');
+            const [stdLength, setStdLength] = useState('3000');
+            const [overlap, setOverlap] = useState('50');
+            const [totalDim, setTotalDim] = useState('');
             const [history, setHistory] = useState(() => getStored('gradient_calc_history', []));
 
-            const [allocL, setAllocL] = useState(() => localStorage.getItem('allocL') || '');
-            const [allocPitch, setAllocPitch] = useState(() => localStorage.getItem('allocPitch') || '');
-            const [allocCount, setAllocCount] = useState(() => localStorage.getItem('allocCount') || '');
-            const [allocW, setAllocW] = useState(() => localStorage.getItem('allocW') || '');
-            const [allocNo, setAllocNo] = useState(() => localStorage.getItem('allocNo') || '');
-            const [allocSource, setAllocSource] = useState(() => localStorage.getItem('allocSource') || null);
+            const [allocL, setAllocL] = useState('');
+            const [allocPitch, setAllocPitch] = useState('');
+            const [allocCount, setAllocCount] = useState('');
+            const [allocW, setAllocW] = useState('');
+            const [allocNo, setAllocNo] = useState('');
+            const [allocSource, setAllocSource] = useState(null);
             const [allocHistory, setAllocHistory] = useState(() => getStored('waritsuke_history', []));
             const [allocCalcInput, setAllocCalcInput] = useState('');
-            const [allocCumulativeSum, setAllocCumulativeSum] = useState(() => toNum(localStorage.getItem('allocCumulativeSum') || 0));
-            const [allocSumHistory, setAllocSumHistory] = useState(() => getStored('allocSumHistory', []));
 
-            const [kanaPitch, setKanaPitch] = useState(() => localStorage.getItem('kanaPitch') || '');
-            const [kanaCount, setKanaCount] = useState(() => localStorage.getItem('kanaCount') || '');
-            const [kanaLength, setKanaLength] = useState(() => localStorage.getItem('kanaLength') || '');
+            const [kanaPitch, setKanaPitch] = useState('');
+            const [kanaCount, setKanaCount] = useState('');
+            const [kanaLength, setKanaLength] = useState('');
 
-            const [tfSize, setTfSize] = useState(() => localStorage.getItem('tfSize') || '600');
-            const [tfTotalL, setTfTotalL] = useState(() => localStorage.getItem('tfTotalL') || '');
+            const [tfSize, setTfSize] = useState('600');
+            const [tfTotalL, setTfTotalL] = useState('');
 
-            const [totalHistory, setTotalHistory] = useState(() => getStored('totalHistory', []));
             const [calcInput, setCalcInput] = useState('');
             const [isClearModalOpen, setIsClearModalOpen] = useState(false);
             const [toastMsg, setToastMsg] = useState('');
@@ -732,7 +729,8 @@
                 });
                 lines.push(`端材 | 働き端材: ${Math.round(slopeCalculated.scrapW).toLocaleString()} mm | 長さ端材: ${Math.round(slopeCalculated.scrapL).toLocaleString()} mm`);
 
-                copyToClipboard(lines.join('\n'), '勾配寸法計算結果');
+                copyToClipboard(lines.join('
+'), '勾配寸法計算結果');
             };
 
             const resetSlopeInputs = () => {
@@ -752,8 +750,6 @@
             const addValue = () => {
                 const val = toNum(calcInput);
                 if (val > 0) {
-                    setTotalHistory([...totalHistory, { sum: cumulativeSum, total: totalDim }]);
-                    setCumulativeSum(prev => prev + val);
                     setTotalDim(prev => (toNum(prev) + val).toString());
                     setCalcInput('');
                     setTimeout(() => calcInputRef.current?.focus(), 50);
@@ -763,8 +759,6 @@
             const addAllocValue = () => {
                 const val = toNum(allocCalcInput);
                 if (val > 0) {
-                    setAllocSumHistory([...allocSumHistory, { sum: allocCumulativeSum, total: allocW }]);
-                    setAllocCumulativeSum(prev => prev + val);
                     setAllocW(prev => (toNum(prev) + val).toString());
                     setAllocCalcInput('');
                     setTimeout(() => allocCalcInputRef.current?.focus(), 50);
@@ -833,7 +827,7 @@
             }, [activeApp, totalDim, currentProductName, stdLength, overlap, materialResult, allocW, allocSource, allocPitch, allocCount, allocCalculated, slopeCalculated, slopeZoomImg, isClearModalOpen]);
 
             return (
-                <div className="flex flex-col h-full bg-[#121214] text-zinc-100 select-none overflow-hidden">
+                <div className="flex flex-col h-full bg-[#121214] text-zinc-100 overflow-hidden">
                     {toastMsg && (
                         <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[300] bg-zinc-800/90 text-white px-4 py-2 rounded-full border border-zinc-700/80 shadow-2xl flex items-center gap-2 backdrop-blur-md text-xs font-semibold animate-fade-in">
                             <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -842,7 +836,7 @@
                     )}
 
                     {/* macOS Title Bar & Unified Segmented Controls */}
-                    <header className="h-13 px-4 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl flex items-center justify-between shrink-0 z-40">
+                    <header className="h-13 px-4 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl flex items-center justify-between shrink-0 z-40 select-none">
                         <div className="flex items-center gap-4">
                             {/* Mac Traffic Light Accent Buttons */}
                             <div className="flex items-center gap-2 px-1">
@@ -890,19 +884,19 @@
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
                                         <div className="mac-card p-4 space-y-3">
-                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">役物 標準設定</div>
+                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400 select-none">役物 標準設定</div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block">標準長さ (mm)</label>
+                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">標準長さ (mm)</label>
                                                     <input ref={stdLengthRef} type="text" value={format(stdLength)} onFocus={handleFocus} onChange={(e) => setStdLength(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, overlapRef)} className="mac-input w-full" placeholder="3000" />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block">重ね代 (mm)</label>
+                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">重ね代 (mm)</label>
                                                     <input ref={overlapRef} type="text" value={format(overlap)} onFocus={handleFocus} onChange={(e) => setOverlap(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, totalDimRef)} className="mac-input w-full" placeholder="50" />
                                                 </div>
                                             </div>
                                             <div className="pt-2 border-t border-zinc-800">
-                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block">取付け総距離 (mm)</label>
+                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">取付け総距離 (mm)</label>
                                                 <div className="relative">
                                                     <input ref={totalDimRef} type="text" value={format(totalDim)} onFocus={handleFocus} onChange={(e) => setTotalDim(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, calcInputRef)} className="mac-input w-full !text-lg font-bold text-orange-400" placeholder="0" />
                                                     {totalDim && <button onClick={() => setTotalDim('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"><Icon name="x" size={16} /></button>}
@@ -910,23 +904,23 @@
                                             </div>
                                             <div className="flex gap-2">
                                                 <input ref={calcInputRef} type="text" value={format(calcInput)} onFocus={handleFocus} onChange={(e) => setCalcInput(unformat(e.target.value))} onKeyDown={(e) => e.key === 'Enter' && addValue()} className="mac-input flex-1" placeholder="＋加算寸法を入力" />
-                                                <button onClick={addValue} className="mac-btn mac-btn-primary gap-1">
+                                                <button onClick={addValue} className="mac-btn mac-btn-primary gap-1 select-none">
                                                     <Icon name="plus" size={14} /> 加算
                                                 </button>
-                                                <button onClick={() => { setTotalDim(''); setCalcInput(''); }} className="mac-btn text-xs">リセット</button>
+                                                <button onClick={() => { setTotalDim(''); setCalcInput(''); }} className="mac-btn text-xs select-none">リセット</button>
                                             </div>
                                         </div>
 
                                         <div className="mac-card p-4 space-y-3">
-                                            <label className="text-xs text-zinc-400 font-semibold block">部材品名・メモ</label>
+                                            <label className="text-xs text-zinc-400 font-semibold block select-none">部材品名・メモ</label>
                                             <input ref={productNameRef} type="text" value={currentProductName} onFocus={handleFocus} onChange={(e) => setCurrentProductName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveToHistoryManually()} className="mac-input w-full" placeholder="棟包み、唐草、雨押え等" />
-                                            <button onClick={saveToHistoryManually} className="mac-btn mac-btn-primary w-full !py-2.5">
+                                            <button onClick={saveToHistoryManually} className="mac-btn mac-btn-primary w-full !py-2.5 select-none">
                                                 履歴に保存 <span className="kbd-badge ml-1.5">⌘S</span>
                                             </button>
                                         </div>
 
                                         {/* Result Cards */}
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-3 select-none">
                                             <div className="mac-card p-4 border-l-4 border-l-emerald-500">
                                                 <span className="text-xs text-zinc-400 font-bold block mb-1">必要本数</span>
                                                 <div className="flex items-baseline gap-1.5">
@@ -945,7 +939,7 @@
                                     </div>
 
                                     {/* History & Summary Panel */}
-                                    <div className="col-span-7 flex flex-col gap-4 overflow-hidden h-full">
+                                    <div className="col-span-7 flex flex-col gap-4 overflow-hidden h-full select-none">
                                         {Object.keys(calcSummaryByName).length > 0 && (
                                             <div className="mac-card p-3 shrink-0">
                                                 <div className="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">品名別 集計</div>
@@ -1010,42 +1004,42 @@
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
                                         <div className="mac-card p-4 space-y-3">
-                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">割付パラメーター</div>
+                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400 select-none">割付パラメーター</div>
                                             <div>
-                                                <label className="text-xs text-orange-400 font-semibold mb-1 block">材料寸法 (mm)</label>
+                                                <label className="text-xs text-orange-400 font-semibold mb-1 block select-none">材料寸法 (mm)</label>
                                                 <input ref={allocLRef} type="text" value={format(allocL)} onFocus={handleFocus} onChange={(e) => setAllocL(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, allocWRef)} className="mac-input w-full text-orange-300" placeholder="材料の長さ" />
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-xs text-blue-400 font-semibold mb-1 block">働き幅 (ピッチ)</label>
+                                                    <label className="text-xs text-blue-400 font-semibold mb-1 block select-none">働き幅 (ピッチ)</label>
                                                     <input ref={allocPitchRef} type="text" value={allocSource === 'count' ? allocCalculated.countMode.w : format(allocPitch)} onFocus={handleFocus} onChange={(e) => { setAllocPitch(unformat(e.target.value)); setAllocSource('pitch'); }} onKeyDown={(e) => handleEnterKey(e, allocWRef)} className={`mac-input w-full ${allocSource === 'pitch' ? '!border-blue-500 text-blue-400' : ''}`} placeholder="ピッチ" />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-emerald-400 font-semibold mb-1 block">指定数量 (枚数)</label>
+                                                    <label className="text-xs text-emerald-400 font-semibold mb-1 block select-none">指定数量 (枚数)</label>
                                                     <input ref={allocCountRef} type="text" value={allocSource === 'pitch' ? allocCalculated.pitchMode.q : format(allocCount)} onFocus={handleFocus} onChange={(e) => { setAllocCount(unformat(e.target.value)); setAllocSource('count'); }} onKeyDown={(e) => handleEnterKey(e, allocWRef)} className={`mac-input w-full ${allocSource === 'count' ? '!border-emerald-500 text-emerald-400' : ''}`} placeholder="数量" />
                                                 </div>
                                             </div>
                                             <div className="pt-2 border-t border-zinc-800">
-                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block">全張り幅 (mm)</label>
+                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">全張り幅 (mm)</label>
                                                 <input ref={allocWRef} type="text" value={format(allocW)} onFocus={handleFocus} onChange={(e) => setAllocW(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, allocCalcInputRef)} className="mac-input w-full !text-lg font-bold" placeholder="施工幅" />
                                             </div>
                                             <div className="flex gap-2">
                                                 <input ref={allocCalcInputRef} type="text" value={format(allocCalcInput)} onFocus={handleFocus} onChange={(e) => setAllocCalcInput(unformat(e.target.value))} onKeyDown={(e) => e.key === 'Enter' && addAllocValue()} className="mac-input flex-1" placeholder="＋加算寸法" />
-                                                <button onClick={addAllocValue} className="mac-btn mac-btn-primary gap-1"><Icon name="plus" size={14} />加算</button>
-                                                <button onClick={() => { setAllocW(''); setAllocL(''); setAllocPitch(''); setAllocCount(''); setAllocNo(''); setAllocSource(null); }} className="mac-btn text-xs">リセット</button>
+                                                <button onClick={addAllocValue} className="mac-btn mac-btn-primary gap-1 select-none"><Icon name="plus" size={14} />加算</button>
+                                                <button onClick={() => { setAllocW(''); setAllocL(''); setAllocPitch(''); setAllocCount(''); setAllocNo(''); setAllocSource(null); }} className="mac-btn text-xs select-none">リセット</button>
                                             </div>
                                         </div>
 
                                         <div className="mac-card p-4 space-y-3">
-                                            <label className="text-xs text-zinc-400 font-semibold block">割付備考・施工面</label>
+                                            <label className="text-xs text-zinc-400 font-semibold block select-none">割付備考・施工面</label>
                                             <input ref={allocNoRef} type="text" value={allocNo} onFocus={handleFocus} onChange={(e) => setAllocNo(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveAllocHistory()} className="mac-input w-full" placeholder="南面、北面、外壁など" />
-                                            <button onClick={saveAllocHistory} className="mac-btn mac-btn-primary w-full !py-2.5">
+                                            <button onClick={saveAllocHistory} className="mac-btn mac-btn-primary w-full !py-2.5 select-none">
                                                 履歴に保存 <span className="kbd-badge ml-1.5">⌘S</span>
                                             </button>
                                         </div>
 
                                         {/* Result Cards */}
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 select-none">
                                             <div className="mac-card p-3.5 border-l-4 border-l-blue-500">
                                                 <span className="text-xs text-blue-400 font-bold block mb-1">働き幅基準 結果 {allocSource === 'pitch' && '★'}</span>
                                                 <div className="flex justify-between items-baseline font-mono">
@@ -1075,7 +1069,7 @@
                                     </div>
 
                                     {/* History Panel */}
-                                    <div className="col-span-7 flex flex-col gap-4 overflow-hidden h-full">
+                                    <div className="col-span-7 flex flex-col gap-4 overflow-hidden h-full select-none">
                                         {Object.keys(allocSummaryByMemo).length > 0 && (
                                             <div className="mac-card p-3 shrink-0">
                                                 <div className="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">備考別 集計</div>
@@ -1136,10 +1130,10 @@
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
                                         <div className="mac-card p-4 space-y-3">
-                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">タイトフレーム パラメーター</div>
+                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400 select-none">タイトフレーム パラメーター</div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block">山ピッチ (タイプ)</label>
+                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">山ピッチ (タイプ)</label>
                                                     <select value={tfSize} onChange={(e) => setTfSize(e.target.value)} className="mac-input w-full">
                                                         <option value="600">600 (折板)</option>
                                                         <option value="500">500 (角ハゼ)</option>
@@ -1147,24 +1141,24 @@
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block">全長芯 (自動計算)</label>
-                                                    <input type="text" readOnly value={format(tfResults.centerL)} className="mac-input w-full bg-zinc-900/60 text-zinc-400 pointer-events-none" />
+                                                    <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">全長芯 (自動計算)</label>
+                                                    <input type="text" readOnly value={format(tfResults.centerL)} className="mac-input w-full bg-zinc-900/60 text-zinc-400 pointer-events-none select-none" />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block">梁全長 (mm)</label>
+                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">梁全長 (mm)</label>
                                                 <input ref={tfTotalLRef} type="text" value={format(tfTotalL)} onFocus={handleFocus} onChange={(e) => setTfTotalL(unformat(e.target.value))} className="mac-input w-full !text-lg font-bold" placeholder="梁の全長を入力" />
                                             </div>
                                             <div className="pt-2">
-                                                <button onClick={() => setTfTotalL('')} className="mac-btn w-full text-xs">リセット</button>
+                                                <button onClick={() => setTfTotalL('')} className="mac-btn w-full text-xs select-none">リセット</button>
                                             </div>
                                         </div>
 
-                                        <div className="mac-card p-4 flex flex-col items-center justify-center bg-black/60 border border-zinc-800">
+                                        <div className="mac-card p-4 flex flex-col items-center justify-center bg-black/60 border border-zinc-800 select-none">
                                             <RoofProfileSVG size={tfSize} />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-3 select-none">
                                             <div className="mac-card p-3.5 border-l-4 border-l-blue-500">
                                                 <span className="text-xs text-blue-400 font-bold block mb-1">谷芯 端部基準 (タイト)</span>
                                                 <div className="text-2xl font-mono font-bold text-white mb-1.5">{tfResults.taniZan !== '' ? format(tfResults.taniZan) : '-'} <span className="text-xs font-normal">mm</span></div>
@@ -1179,7 +1173,7 @@
                                     </div>
 
                                     {/* Table View */}
-                                    <div className="col-span-7 mac-card flex flex-col overflow-hidden h-full">
+                                    <div className="col-span-7 mac-card flex flex-col overflow-hidden h-full select-none">
                                         <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/60 shrink-0">
                                             <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">タイトフレーム割付位置 墨出し表</span>
                                             <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">タイト合計: {tfResults.count} 本</span>
@@ -1215,25 +1209,25 @@
                                 <div className="grid grid-cols-12 gap-5 h-full overflow-hidden text-sm">
                                     <div className="col-span-5 flex flex-col gap-4 overflow-y-auto pr-1">
                                         <div className="mac-card p-4 space-y-3">
-                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">金物 パラメーター</div>
+                                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400 select-none">金物 パラメーター</div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="text-xs text-blue-400 font-semibold mb-1 block">ピッチ (働き)</label>
+                                                    <label className="text-xs text-blue-400 font-semibold mb-1 block select-none">ピッチ (働き)</label>
                                                     <input ref={kanamonoPitchRef} type="text" value={format(kanaPitch)} onFocus={handleFocus} onChange={(e) => setKanaPitch(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, kanamonoLengthRef)} className="mac-input w-full text-blue-400" placeholder="例: 450" />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-emerald-400 font-semibold mb-1 block">指定本数</label>
+                                                    <label className="text-xs text-emerald-400 font-semibold mb-1 block select-none">指定本数</label>
                                                     <input ref={kanamonoCountRef} type="text" value={format(kanaCount)} onFocus={handleFocus} onChange={(e) => setKanaCount(unformat(e.target.value))} onKeyDown={(e) => handleEnterKey(e, kanamonoLengthRef)} className="mac-input w-full text-emerald-400" placeholder="例: 10" />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block">全幅 (mm)</label>
+                                                <label className="text-xs text-zinc-400 font-semibold mb-1 block select-none">全幅 (mm)</label>
                                                 <input ref={kanamonoLengthRef} type="text" value={format(kanaLength)} onFocus={handleFocus} onChange={(e) => setKanaLength(unformat(e.target.value))} className="mac-input w-full !text-lg font-bold" placeholder="取り付け全長" />
                                             </div>
-                                            <button onClick={() => { setKanaPitch(''); setKanaCount(''); setKanaLength(''); }} className="mac-btn w-full text-xs">リセット</button>
+                                            <button onClick={() => { setKanaPitch(''); setKanaCount(''); setKanaLength(''); }} className="mac-btn w-full text-xs select-none">リセット</button>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-3 select-none">
                                             <div className="mac-card p-3.5 border-l-4 border-l-blue-500 font-mono">
                                                 <span className="text-xs text-blue-400 font-bold block mb-1 font-sans">ピッチ基準 結果</span>
                                                 <div className="text-2xl font-bold text-blue-400">{kanamonoResults.resQ.val} <span className="text-xs font-normal text-zinc-400">本</span></div>
@@ -1248,7 +1242,7 @@
                                     </div>
 
                                     {/* Table View */}
-                                    <div className="col-span-7 mac-card flex flex-col overflow-hidden h-full">
+                                    <div className="col-span-7 mac-card flex flex-col overflow-hidden h-full select-none">
                                         <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/60 shrink-0">
                                             <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">割付 墨出し位置一覧</span>
                                             <span className="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">W: {format(kanaLength)} mm</span>
@@ -1285,7 +1279,7 @@
                                     {/* 左側：入力 & サマリー & Canvas */}
                                     <div className="col-span-7 flex flex-col gap-4 overflow-y-auto pr-1">
                                         <div className="mac-card p-4 space-y-3">
-                                            <div className="flex items-center justify-between">
+                                            <div className="flex items-center justify-between select-none">
                                                 <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">設計寸法 入力</div>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[11px] text-zinc-500">Tabで次へ移動 / 即時計算</span>
@@ -1296,7 +1290,7 @@
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* 基準側 L1 */}
                                                 <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#30d158] transition-all">
-                                                    <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex justify-between items-center mb-1 select-none">
                                                         <label className="text-xs font-bold text-[#30d158]">基準側 L1 (mm)</label>
                                                         {slopeL1 && <button onClick={() => setSlopeL1('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
                                                     </div>
@@ -1305,7 +1299,7 @@
 
                                                 {/* 延長側 L2 */}
                                                 <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#30d158] transition-all">
-                                                    <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex justify-between items-center mb-1 select-none">
                                                         <label className="text-xs font-bold text-[#30d158]">延長側 L2 (mm)</label>
                                                         {slopeL2 && <button onClick={() => setSlopeL2('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
                                                     </div>
@@ -1314,7 +1308,7 @@
 
                                                 {/* 全体の幅 W */}
                                                 <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#0a84ff] transition-all">
-                                                    <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex justify-between items-center mb-1 select-none">
                                                         <label className="text-xs font-bold text-[#0a84ff]">全体の幅 W (mm)</label>
                                                         {slopeW && <button onClick={() => setSlopeW('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
                                                     </div>
@@ -1323,7 +1317,7 @@
 
                                                 {/* 働き幅 ＠ */}
                                                 <div className="bg-[#121214] border border-[#2c2c2e] rounded-lg p-2.5 focus-within:border-[#bf5af2] transition-all">
-                                                    <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex justify-between items-center mb-1 select-none">
                                                         <label className="text-xs font-bold text-[#bf5af2]">働き幅 ＠ (mm)</label>
                                                         {slopePitch && <button onClick={() => setSlopePitch('')} className="text-[10px] text-zinc-500 hover:text-zinc-300">消去</button>}
                                                     </div>
@@ -1333,7 +1327,7 @@
                                         </div>
 
                                         {/* 計算結果サマリー */}
-                                        <div className="grid grid-cols-4 gap-3">
+                                        <div className="grid grid-cols-4 gap-3 select-none">
                                             <div className="mac-card p-3 text-center border-b-2 border-b-[#0a84ff]">
                                                 <span className="block text-[11px] font-bold text-[#0a84ff] mb-1">延長後の幅</span>
                                                 <span className="text-xl font-mono font-bold text-white">{slopeCalculated.isValid ? Math.round(slopeCalculated.newB).toLocaleString() : '-'}</span>
@@ -1353,7 +1347,7 @@
                                         </div>
 
                                         {/* 勾配 断面形状図 Canvas */}
-                                        <div className="mac-card p-4 flex flex-col">
+                                        <div className="mac-card p-4 flex flex-col select-none">
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">勾配 断面形状図</span>
                                                 <span className="text-[11px] text-zinc-500">クリックで拡大プレビュー</span>
@@ -1365,7 +1359,7 @@
                                     </div>
 
                                     {/* 右側：各ピッチ寸法詳細テーブル */}
-                                    <div className="col-span-5 mac-card flex flex-col overflow-hidden h-full">
+                                    <div className="col-span-5 mac-card flex flex-col overflow-hidden h-full select-none">
                                         <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/60 shrink-0">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">各ピッチ寸法詳細</span>
@@ -1422,7 +1416,7 @@
 
                     {/* 勾配 Canvas 拡大プレビュー用モーダル */}
                     {slopeZoomImg && (
-                        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-md p-6" onClick={() => setSlopeZoomImg(null)}>
+                        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-md p-6 select-none" onClick={() => setSlopeZoomImg(null)}>
                             <div className="relative max-w-5xl w-full max-h-[90vh] mac-card p-4 flex flex-col shadow-2xl border border-white/20 animate-fade-in" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-xs font-bold text-white uppercase tracking-wider">勾配 断面形状図 拡大プレビュー</span>
@@ -1437,7 +1431,7 @@
 
                     {/* Clear Confirmation Modal */}
                     {isClearModalOpen && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 select-none">
                             <div className="mac-card p-6 w-80 text-center space-y-4 shadow-2xl border border-white/20 animate-fade-in">
                                 <h3 className="text-sm font-bold text-white">履歴の全削除</h3>
                                 <p className="text-xs text-zinc-400">すべての計算履歴を消去します。<br/>この操作は元に戻せません。</p>
@@ -1461,12 +1455,29 @@
         root.render(<App />);
     </script>
     <script>
-        if ('serviceWorker' in navigator) {
+        // PWAのアップデート検知と自動リロード
+        if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then((registration) => {
-                    console.log('ServiceWorker registration successful:', registration.scope);
-                }).catch((err) => {
-                    console.error('ServiceWorker registration failed:', err);
+                navigator.serviceWorker.register('./sw.js?v={version_string}').then((registration) => {
+                    registration.onupdatefound = () => {
+                        const installingWorker = registration.installing;
+                        if (!installingWorker) return;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // 新しいバージョンがインストールされたら古いSWを強制スキップ
+                                installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        };
+                    };
+                }).catch((err) => {});
+                
+                // コントローラーが切り替わった（新しいバージョンがアクティブになった）らリロード
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        window.location.reload();
+                        refreshing = true;
+                    }
                 });
             });
         }

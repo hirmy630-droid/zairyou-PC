@@ -1,8 +1,10 @@
-const CACHE_NAME = 'zairyo-pc-mac-pwa-v20260928-04';
+const CACHE_NAME = 'zairyo-pc-mac-pwa-v202609290903';
 const CORE_ASSETS = [
   './',
   './index.html',
+  './index.html?pwa=202609290903',
   './manifest.json',
+  './manifest.json?v=202609290903',
   './sw.js'
 ];
 

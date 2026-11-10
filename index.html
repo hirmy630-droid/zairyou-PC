@@ -15,7 +15,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121214">
     <style>
+        * {
+            min-font-size: 15px;
+        }
         body {
+            font-size: 15px;
             background-color: #121214;
             color: #f5f5f7;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
@@ -73,10 +77,16 @@
             opacity: 0.75;
         }
         .kp-large-num {
-            background-color: #161618;
+            background: linear-gradient(180deg, #5c5c5e 0%, #4a4a4c 100%);
             color: #ffffff;
-            border: 1px solid #2c2c2e;
+            border: 1px solid #3a3a3c;
             font-weight: 800;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .kp-large-num:active {
+            background: #4a4a4c;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+            transform: translateY(1px);
         }
         .kp-large-fn {
             background-color: #323236;
@@ -1124,50 +1134,49 @@
                                 <span className="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                                 <span className="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                                 <span className="w-3 h-3 rounded-full bg-[#27c93f]"></span>
-                                <h1 className="text-sm md:text-base font-bold text-white tracking-wide ml-1">KYOWA ROOF</h1>
+                                <h1 className="text-base md:text-base font-bold text-white tracking-wide ml-1">KYOWA ROOF</h1>
                             </div>
 
                             <nav className="flex bg-[#1c1c1e] p-1 rounded-xl border border-[#2c2c2e]">
                                 <button
                                     onClick={() => setCurrentAppTab('waritsuke')}
-                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${currentAppTab === 'waritsuke' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
+                                    className={`px-4 py-1 rounded-lg text-[15px] font-bold transition-all ${currentAppTab === 'waritsuke' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
                                 >
-                                    材料取り割付
+                                    材料取り
                                 </button>
                                 <button
                                     onClick={() => setCurrentAppTab('trim')}
-                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${currentAppTab === 'trim' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
+                                    className={`px-4 py-1 rounded-lg text-[15px] font-bold transition-all flex items-center gap-1.5 ${currentAppTab === 'trim' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
                                 >
-                                    <span>役物材料 計算</span>
-                                    {savedTallies.length > 0 && <span className="px-1.5 py-0.2 bg-zinc-800 text-orange-400 rounded-full text-[10px]">{savedTallies.length}</span>}
+                                    <span>役物材料</span>
                                 </button>
                                 <button
                                     onClick={() => setCurrentAppTab('kanamono')}
-                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${currentAppTab === 'kanamono' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
+                                    className={`px-4 py-1 rounded-lg text-[15px] font-bold transition-all ${currentAppTab === 'kanamono' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
                                 >
                                     金物割付
                                 </button>
                                 <button
                                     onClick={() => setCurrentAppTab('slope')}
-                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${currentAppTab === 'slope' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
+                                    className={`px-4 py-1 rounded-lg text-[15px] font-bold transition-all ${currentAppTab === 'slope' ? 'bg-[#ff9500] text-black shadow-md' : 'text-zinc-400 hover:text-white'}`}
                                 >
-                                    勾配 寸法計算
+                                    勾配寸法
                                 </button>
                             </nav>
                         </div>
                     </header>
 
-                    <main className="flex-1 max-w-[1720px] w-full mx-auto p-2 md:p-3">
+                    <main className="flex-1 max-w-[1194px] w-full mx-auto p-3 md:p-4">
                         {/* 1. 材料取り割付 */}
                         {currentAppTab === 'waritsuke' && (
-                            <div className="grid grid-cols-2 gap-3 items-start">
+                            <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-2 min-w-0 bg-[#18181b] p-3 rounded-xl border border-[#2c2c2e] shadow-lg">
                                     <div className="flex items-center justify-between border-b border-[#2c2c2e] pb-1">
-                                        <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                                        <h2 className="text-[15px] font-bold text-white flex items-center gap-1.5">
                                             <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
                                             割付 入力パラメータ
                                         </h2>
-                                        <span className="text-[10px] text-zinc-400">タップして選択</span>
+                                        <span className="text-[15px] text-zinc-400">タップして選択</span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-1.5">
@@ -1175,12 +1184,12 @@
                                             onClick={() => { setWActiveField('no'); setWIsNewEntry(true); }}
                                             className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${wActiveField === 'no' ? 'border-orange-500 bg-orange-500/10 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-zinc-400">備考 (名前等)</label>
+                                            <label className="text-[15px] font-bold text-zinc-400">備考 (名前等)</label>
                                             <input
                                                 type="text"
                                                 value={wInputNo}
                                                 readOnly
-                                                className="w-full bg-transparent text-white font-bold outline-none text-xs h-5 pointer-events-none"
+                                                className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5 pointer-events-none"
                                                 placeholder="名前、場所、番号等"
                                             />
                                         </div>
@@ -1188,12 +1197,12 @@
                                             onClick={() => { setWActiveField('memoDim'); setWIsNewEntry(true); }}
                                             className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${wActiveField === 'memoDim' ? 'border-orange-500 bg-orange-500/10 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-[#ff9f0a]">材料寸法 (L)</label>
+                                            <label className="text-[15px] font-bold text-[#ff9f0a]">材料寸法 (L)</label>
                                             <input
                                                 type="text"
                                                 value={wMemoDim}
                                                 readOnly
-                                                className="w-full bg-transparent text-[#ff9f0a] font-bold outline-none font-mono text-xs h-5 pointer-events-none"
+                                                className="w-full bg-transparent text-[#ff9f0a] font-bold outline-none font-mono text-[15px] h-5 pointer-events-none"
                                                 placeholder="材料の長さ"
                                             />
                                         </div>
@@ -1205,8 +1214,8 @@
                                             className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${wActiveField === 'pitch' ? 'border-[#0a84ff] bg-[#0a84ff]/15 ring-2 ring-[#0a84ff]' : (wInputSource === 'pitch' ? 'border-[#0a84ff]/60 bg-[#121214]' : 'border-[#2c2c2e] bg-[#121214]')}`}
                                         >
                                             <div className="flex justify-between items-center mb-0.5">
-                                                <label className="text-[10px] font-bold text-[#0a84ff]">働き (＠)</label>
-                                                {wInputSource === 'pitch' && <span className="text-[8px] bg-[#0a84ff] text-white px-1 rounded font-bold">基準</span>}
+                                                <label className="text-[15px] font-bold text-[#0a84ff]">働き (＠)</label>
+                                                {wInputSource === 'pitch' && <span className="text-[15px] bg-[#0a84ff] text-white px-1 rounded font-bold">基準</span>}
                                             </div>
                                             <div className="text-xl font-black font-mono text-[#0a84ff] text-center h-6 flex items-center justify-center">
                                                 {wPitch || '0'}
@@ -1218,8 +1227,8 @@
                                             className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${wActiveField === 'count' ? 'border-[#30d158] bg-[#30d158]/15 ring-2 ring-[#30d158]' : (wInputSource === 'count' ? 'border-[#30d158]/60 bg-[#121214]' : 'border-[#2c2c2e] bg-[#121214]')}`}
                                         >
                                             <div className="flex justify-between items-center mb-0.5">
-                                                <label className="text-[10px] font-bold text-[#30d158]">数量 (N)</label>
-                                                {wInputSource === 'count' && <span className="text-[8px] bg-[#30d158] text-black px-1 rounded font-bold">基準</span>}
+                                                <label className="text-[15px] font-bold text-[#30d158]">数量 (N)</label>
+                                                {wInputSource === 'count' && <span className="text-[15px] bg-[#30d158] text-black px-1 rounded font-bold">基準</span>}
                                             </div>
                                             <div className="text-xl font-black font-mono text-[#30d158] text-center h-6 flex items-center justify-center">
                                                 {wCount || '0'}
@@ -1232,11 +1241,11 @@
                                         className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${wActiveField === 'totalLength' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-orange-500/70 bg-[#121214]'}`}
                                     >
                                         <div className="flex justify-between items-center mb-0.5">
-                                            <label className="text-[10px] font-black text-zinc-300">全幅 (W) - 張り面幅</label>
-                                            <span className="text-[10px] text-orange-400 font-mono">mm</span>
+                                            <label className="text-[15px] font-black text-zinc-300">全幅 (W) - 張り面幅</label>
+                                            <span className="text-[15px] text-orange-400 font-mono">mm</span>
                                         </div>
                                         <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
-                                            {wTotalLength || <span className="text-zinc-600 text-sm">張り面幅</span>}
+                                            {wTotalLength || <span className="text-zinc-600 text-base">張り面幅</span>}
                                         </div>
                                     </div>
 
@@ -1245,24 +1254,24 @@
                                             onClick={() => { setWActiveField('addLength'); setWIsNewEntry(true); }}
                                             className={`flex-1 flex items-center px-2 py-1 rounded-lg border transition-all cursor-pointer ${wActiveField === 'addLength' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <span className="text-xs font-bold text-zinc-400 mr-2 shrink-0">+加算:</span>
-                                            <div className="flex-1 text-center font-mono font-bold text-sm text-zinc-200 h-5 flex items-center justify-center">
-                                                {wAddLength || <span className="text-zinc-600 text-xs">加算値</span>}
+                                            <span className="text-[15px] font-bold text-zinc-400 mr-2 shrink-0">+加算:</span>
+                                            <div className="flex-1 text-center font-mono font-bold text-base text-zinc-200 py-0.5 flex items-center justify-center">
+                                                {wAddLength || <span className="text-zinc-600 text-[15px]">加算値</span>}
                                             </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={executeWAddition}
-                                            className="btn-mac-silver px-3 py-1.5 rounded-lg text-xs font-bold text-white shrink-0 flex items-center gap-1 shadow-sm"
+                                            className="btn-mac-silver px-4 py-2 rounded-lg text-[15px] font-bold text-white shrink-0 flex items-center justify-center gap-1 shadow-sm h-[40px]"
                                         >
                                             <Icon name="plus" size={14} /> 加算
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleWKeypad('⏎')}
-                                            className="btn-mac-silver px-3 py-1.5 rounded-lg text-xs font-bold text-white shrink-0 flex items-center gap-1 shadow-sm"
+                                            className="btn-mac-silver px-4 py-2 rounded-lg text-[15px] font-bold text-white shrink-0 flex items-center justify-center gap-1 shadow-sm h-[40px]"
                                         >
-                                            <Icon name="returnKey" size={14} /> ⏎
+                                            <Icon name="returnKey" size={14} />
                                         </button>
                                     </div>
 
@@ -1294,46 +1303,46 @@
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className={`p-2 rounded-xl border-2 transition-all ${waritsukeResult.source === 'pitch' ? 'border-[#0a84ff] bg-[#18181b] shadow-md' : 'border-[#2c2c2e] bg-[#18181b] opacity-60'}`}>
                                             <div className="flex justify-between items-center mb-1 border-b border-[#2c2c2e] pb-1">
-                                                <span className="text-xs font-bold text-zinc-300">働き基準結果 {waritsukeResult.source === 'pitch' && '★'}</span>
-                                                <span className="text-xs text-[#0a84ff] font-mono font-bold">@{formatNumber(parseValue(wPitch))}</span>
+                                                <span className="text-[15px] font-bold text-zinc-300">働き基準結果 {waritsukeResult.source === 'pitch' && '★'}</span>
+                                                <span className="text-[15px] text-[#0a84ff] font-mono font-bold">@{formatNumber(parseValue(wPitch))}</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-1 text-center">
                                                 <div>
-                                                    <span className="text-[10px] font-bold text-[#0a84ff] block uppercase">必要数量</span>
+                                                    <span className="text-[15px] font-bold text-[#0a84ff] block uppercase">必要数量</span>
                                                     <span className="text-2xl font-mono font-black text-[#0a84ff]">
                                                         {waritsukeResult.source === 'pitch' ? formatNumber(waritsukeResult.qty) : (waritsukeResult.source === 'count' ? formatNumber(waritsukeResult.qtyForW) : '-')}
                                                     </span>
-                                                    <span className="text-[10px] text-zinc-400 ml-0.5">枚</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">枚</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-[10px] font-bold text-zinc-400 block uppercase">残材余り</span>
+                                                    <span className="text-[15px] font-bold text-zinc-400 block uppercase">残材余り</span>
                                                     <span className="text-2xl font-mono font-black text-zinc-200">
                                                         {waritsukeResult.source === 'pitch' ? formatNumber(waritsukeResult.remP) : (waritsukeResult.source === 'count' ? formatNumber(waritsukeResult.remP_fromCount) : '-')}
                                                     </span>
-                                                    <span className="text-[10px] text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className={`p-2 rounded-xl border-2 transition-all ${waritsukeResult.source === 'count' ? 'border-[#30d158] bg-[#18181b] shadow-md' : 'border-[#2c2c2e] bg-[#18181b] opacity-60'}`}>
                                             <div className="flex justify-between items-center mb-1 border-b border-[#2c2c2e] pb-1">
-                                                <span className="text-xs font-bold text-zinc-300">数量基準結果 {waritsukeResult.source === 'count' && '★'}</span>
-                                                <span className="text-xs text-[#30d158] font-mono font-bold">{formatNumber(parseValue(wCount))}枚</span>
+                                                <span className="text-[15px] font-bold text-zinc-300">数量基準結果 {waritsukeResult.source === 'count' && '★'}</span>
+                                                <span className="text-[15px] text-[#30d158] font-mono font-bold">{formatNumber(parseValue(wCount))}枚</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-1 text-center">
                                                 <div>
-                                                    <span className="text-[10px] font-bold text-[#30d158] block uppercase">必要働き</span>
+                                                    <span className="text-[15px] font-bold text-[#30d158] block uppercase">必要働き</span>
                                                     <span className="text-2xl font-mono font-black text-[#30d158]">
                                                         {waritsukeResult.source === 'count' ? formatNumber(waritsukeResult.width) : (waritsukeResult.source === 'pitch' ? formatNumber(waritsukeResult.widthForN) : '-')}
                                                     </span>
-                                                    <span className="text-[10px] text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-[10px] font-bold text-zinc-400 block uppercase">残材余り</span>
+                                                    <span className="text-[15px] font-bold text-zinc-400 block uppercase">残材余り</span>
                                                     <span className="text-2xl font-mono font-black text-zinc-200">
                                                         {waritsukeResult.source === 'count' ? formatNumber(waritsukeResult.remN) : (waritsukeResult.source === 'pitch' ? formatNumber(waritsukeResult.remN_fromPitch) : '-')}
                                                     </span>
-                                                    <span className="text-[10px] text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1341,10 +1350,10 @@
 
                                     {Object.keys(memoSummary).length > 0 && (
                                         <div className="bg-[#18181b] p-2.5 rounded-xl border border-[#2c2c2e]">
-                                            <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">備考別 合計枚数</h3>
+                                            <h3 className="text-[15px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">備考別 合計枚数</h3>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {Object.entries(memoSummary).map(([key, data]) => (
-                                                    <div key={key} className="bg-[#121214] px-2.5 py-1 rounded-lg border border-[#2c2c2e] flex items-center gap-2 text-xs">
+                                                    <div key={key} className="bg-[#121214] px-2.5 py-1 rounded-lg border border-[#2c2c2e] flex items-center gap-2 text-[15px]">
                                                         <span className="font-bold text-white">{key}</span>
                                                         <span className="text-[#0a84ff] font-mono">働:{data.pitchTotal}枚</span>
                                                         <span className="text-[#30d158] font-mono">数:{data.countTotal}枚</span>
@@ -1357,22 +1366,22 @@
                                     <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
                                         <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-xs font-bold text-white">割付履歴</h3>
-                                                <span className="text-[11px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
+                                                <h3 className="text-[15px] font-bold text-white">割付履歴</h3>
+                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
                                                     {wHistory.length}件
                                                 </span>
                                             </div>
                                             {wHistory.length > 0 && (
                                                 <button
                                                     onClick={() => setWConfirmClear(true)}
-                                                    className="text-[11px] font-bold text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-950/30 border border-red-800/40 px-2 py-0.5 rounded"
+                                                    className="text-[15px] font-bold text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-950/30 border border-red-800/40 px-2.5 py-1 rounded"
                                                 >
                                                     <Icon name="trash" size={12} /> 全削除
                                                 </button>
                                             )}
                                         </div>
                                         <div className="overflow-y-auto max-h-[calc(100vh-270px)] custom-scrollbar">
-                                            <table className="w-full text-left text-xs border-collapse">
+                                            <table className="w-full text-left text-[15px] border-collapse">
                                                 <thead className="sticky top-0 bg-[#242426] text-zinc-400 border-b border-[#2c2c2e] z-10">
                                                     <tr>
                                                         <th className="py-2 px-3">備考/寸法</th>
@@ -1392,16 +1401,16 @@
                                                             <tr key={item.id} className="hover:bg-[#1f1f22]">
                                                                 <td className="py-2 px-3">
                                                                     <div className="font-bold text-white">{item.no || '（なし）'}</div>
-                                                                    {item.memoDim && <span className="text-[10px] text-orange-400 font-mono">L:{item.memoDim}</span>}
+                                                                    {item.memoDim && <span className="text-[15px] text-orange-400 font-mono">L:{item.memoDim}</span>}
                                                                 </td>
                                                                 <td className="py-2 px-3 font-mono font-bold text-zinc-200">{item.totalLength}</td>
                                                                 <td className="py-2 px-3">
                                                                     <div className="font-bold text-[#0a84ff] font-mono">{item.resQty}枚 {item.source === 'pitch' && '★'}</div>
-                                                                    <div className="text-[10px] text-zinc-400 font-mono">@{item.pitch} 残:{item.resQtyRem}</div>
+                                                                    <div className="text-[15px] text-zinc-400 font-mono">@{item.pitch} 残:{item.resQtyRem}</div>
                                                                 </td>
                                                                 <td className="py-2 px-3">
                                                                     <div className="font-bold text-[#30d158] font-mono">{item.resWidth}㎜ {item.source === 'count' && '★'}</div>
-                                                                    <div className="text-[10px] text-zinc-400 font-mono">@{item.count}枚 残:{item.resWidthRem}</div>
+                                                                    <div className="text-[15px] text-zinc-400 font-mono">@{item.count}枚 残:{item.resWidthRem}</div>
                                                                 </td>
                                                                 <td className="py-2 px-2 text-center">
                                                                     <button onClick={() => deleteWHistoryRow(item.id)} className="text-zinc-500 hover:text-red-400">
@@ -1421,26 +1430,26 @@
 
                         {/* 2. 役物材料 計算 */}
                         {currentAppTab === 'trim' && (
-                            <div className="grid grid-cols-2 gap-3 items-start">
+                            <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-2 min-w-0 bg-[#18181b] p-3 rounded-xl border border-[#2c2c2e] shadow-lg">
                                     <div className="flex items-center justify-between border-b border-[#2c2c2e] pb-1">
-                                        <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                                        <h2 className="text-[15px] font-bold text-white flex items-center gap-1.5">
                                             <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
                                             役物材料 パラメータ
                                         </h2>
-                                        <span className="text-[10px] text-zinc-400">タップして選択</span>
+                                        <span className="text-[15px] text-zinc-400">タップして選択</span>
                                     </div>
 
                                     <div
                                         onClick={() => { setTrimActiveField('name'); setTrimIsNewEntry(true); }}
                                         className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'name' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                     >
-                                        <label className="text-[10px] font-bold text-zinc-400">品名</label>
+                                        <label className="text-[15px] font-bold text-zinc-400">品名</label>
                                         <input
                                             type="text"
                                             value={currentProductName}
                                             readOnly
-                                            className="w-full bg-transparent text-white font-bold outline-none text-xs h-5 pointer-events-none"
+                                            className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5 pointer-events-none"
                                             placeholder="例: 水切り / 棟包み"
                                         />
                                     </div>
@@ -1450,8 +1459,8 @@
                                             onClick={() => { setTrimActiveField('std'); setTrimIsNewEntry(true); }}
                                             className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'std' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-zinc-300">定尺長さ (mm)</label>
-                                            <div className="text-sm font-bold font-mono text-white text-center h-5 flex items-center justify-center">
+                                            <label className="text-[15px] font-bold text-zinc-300">材料長さ (mm)</label>
+                                            <div className="text-base font-bold font-mono text-white text-center h-5 flex items-center justify-center">
                                                 {stdLength}
                                             </div>
                                             <div className="flex gap-1 mt-0.5">
@@ -1460,7 +1469,7 @@
                                                         key={val}
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); setStdLength(val.toString()); }}
-                                                        className={`flex-1 py-0.5 rounded text-[9px] font-bold border ${stdLength === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
+                                                        className={`flex-1 py-1 rounded text-[15px] font-bold border ${stdLength === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
                                                     >
                                                         {val}
                                                     </button>
@@ -1472,8 +1481,8 @@
                                             onClick={() => { setTrimActiveField('overlap'); setTrimIsNewEntry(true); }}
                                             className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'overlap' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-zinc-300">重ね代 (mm)</label>
-                                            <div className="text-sm font-bold font-mono text-white text-center h-5 flex items-center justify-center">
+                                            <label className="text-[15px] font-bold text-zinc-300">重ね代 (mm)</label>
+                                            <div className="text-base font-bold font-mono text-white text-center h-5 flex items-center justify-center">
                                                 {overlap}
                                             </div>
                                             <div className="flex gap-1 mt-0.5">
@@ -1482,7 +1491,7 @@
                                                         key={val}
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); setOverlap(val.toString()); }}
-                                                        className={`flex-1 py-0.5 rounded text-[9px] font-bold border ${overlap === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
+                                                        className={`flex-1 py-1 rounded text-[15px] font-bold border ${overlap === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
                                                     >
                                                         {val}
                                                     </button>
@@ -1496,10 +1505,10 @@
                                         className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${trimActiveField === 'totalDim' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-orange-500/70 bg-[#121214]'}`}
                                     >
                                         <div className="flex justify-between items-center mb-0.5">
-                                            <label className="text-[10px] font-black text-zinc-300">取り付け全長 (mm)</label>
+                                            <label className="text-[15px] font-black text-zinc-300">取り付け全長 (mm)</label>
                                         </div>
                                         <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
-                                            {totalDim || <span className="text-zinc-600 text-sm">全長を入力</span>}
+                                            {totalDim || <span className="text-zinc-600 text-base">全長を入力</span>}
                                         </div>
                                     </div>
 
@@ -1508,24 +1517,24 @@
                                             onClick={() => { setTrimActiveField('addInput'); setTrimIsNewEntry(true); }}
                                             className={`flex-1 flex items-center px-2 py-1 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'addInput' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <span className="text-xs font-bold text-zinc-400 mr-2 shrink-0">+加算:</span>
-                                            <div className="flex-1 text-center font-mono font-bold text-sm text-zinc-200 h-5 flex items-center justify-center">
-                                                {addInput || <span className="text-zinc-600 text-xs">加算値</span>}
+                                            <span className="text-[15px] font-bold text-zinc-400 mr-2 shrink-0">+加算:</span>
+                                            <div className="flex-1 text-center font-mono font-bold text-base text-zinc-200 py-0.5 flex items-center justify-center">
+                                                {addInput || <span className="text-zinc-600 text-[15px]">加算値</span>}
                                             </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={executeTrimAddition}
-                                            className="btn-mac-silver px-3 py-1.5 rounded-lg text-xs font-bold text-white shrink-0 flex items-center gap-1 shadow-sm"
+                                            className="btn-mac-silver px-4 py-2 rounded-lg text-[15px] font-bold text-white shrink-0 flex items-center justify-center gap-1 shadow-sm h-[40px]"
                                         >
                                             <Icon name="plus" size={14} /> 加算
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleTrimKeypad('⏎')}
-                                            className="btn-mac-silver px-3 py-1.5 rounded-lg text-xs font-bold text-white shrink-0 flex items-center gap-1 shadow-sm"
+                                            className="btn-mac-silver px-4 py-2 rounded-lg text-[15px] font-bold text-white shrink-0 flex items-center justify-center gap-1 shadow-sm h-[40px]"
                                         >
-                                            <Icon name="returnKey" size={14} /> ⏎
+                                            <Icon name="returnKey" size={14} />
                                         </button>
                                     </div>
 
@@ -1557,28 +1566,28 @@
                                     <div className="bg-[#18181b] p-3 rounded-xl border border-[#2c2c2e] shadow-md flex flex-col gap-2">
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="bg-[#121214] p-2 rounded-lg border-2 border-green-500 text-center">
-                                                <span className="text-[10px] font-bold text-zinc-400 block uppercase">必要本数</span>
+                                                <span className="text-[15px] font-bold text-zinc-400 block uppercase">必要本数</span>
                                                 <div className="flex items-baseline justify-center gap-1 mt-0.5">
                                                     <span className="text-2xl font-mono font-black text-green-500">{materialResult.pieces}</span>
-                                                    <span className="text-[10px] font-bold text-zinc-400">本</span>
+                                                    <span className="text-[15px] font-bold text-zinc-400">本</span>
                                                 </div>
                                             </div>
                                             <div className="bg-[#121214] p-2 rounded-lg border-2 border-blue-500 text-center">
-                                                <span className="text-[10px] font-bold text-zinc-400 block uppercase">端材寸法</span>
+                                                <span className="text-[15px] font-bold text-zinc-400 block uppercase">端材寸法</span>
                                                 <div className="flex items-baseline justify-center gap-1 mt-0.5">
                                                     <span className="text-2xl font-mono font-black text-blue-500">{formatNumber(materialResult.remainder)}</span>
-                                                    <span className="text-[10px] font-bold text-zinc-400">㎜</span>
+                                                    <span className="text-[15px] font-bold text-zinc-400">㎜</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {history.length > 0 && (
                                             <div className="flex items-center justify-between bg-[#121214] px-3 py-1.5 rounded-lg border border-orange-500/40">
-                                                <span className="text-xs text-zinc-300">保存済み: <strong className="text-orange-400 font-mono">{history.length}件</strong></span>
+                                                <span className="text-[15px] text-zinc-300">保存済み: <strong className="text-orange-400 font-mono">{history.length}件</strong></span>
                                                 <button
                                                     type="button"
                                                     onClick={saveHistoryTotal}
-                                                    className="btn-mac-primary text-xs font-bold text-black px-3 py-1 rounded-md flex items-center gap-1 shadow"
+                                                    className="btn-mac-primary text-[15px] font-bold text-black px-4 py-1.5 rounded-md flex items-center gap-1 shadow"
                                                 >
                                                     <Icon name="save" size={13} /> 集計へ送る
                                                 </button>
@@ -1589,15 +1598,15 @@
                                     <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
                                         <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-xs font-bold text-white">種類別 集計</h3>
-                                                <span className="text-[11px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
+                                                <h3 className="text-[15px] font-bold text-white">種類別 集計</h3>
+                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
                                                     {savedTallies.length}品名
                                                 </span>
                                             </div>
                                             {savedTallies.length > 0 && (
                                                 <button
                                                     onClick={() => setIsTallyClearModalOpen(true)}
-                                                    className="text-[11px] font-bold text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-950/30 border border-red-800/40 px-2 py-0.5 rounded"
+                                                    className="text-[15px] font-bold text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-950/30 border border-red-800/40 px-2.5 py-1 rounded"
                                                 >
                                                     <Icon name="trash" size={12} /> 全削除
                                                 </button>
@@ -1608,8 +1617,8 @@
                                             {savedTallies.length === 0 ? (
                                                 <div className="py-12 text-center text-zinc-500">
                                                     <Icon name="save" size={30} className="mx-auto mb-1 text-zinc-600" />
-                                                    <p className="font-bold text-xs">集計データがありません</p>
-                                                    <p className="text-[11px] text-zinc-400 mt-0.5">左の「保存」後に上の「集計へ送る」を押すとここに集計されます</p>
+                                                    <p className="font-bold text-[15px]">集計データがありません</p>
+                                                    <p className="text-[15px] text-zinc-400 mt-0.5">左の「保存」後に上の「集計へ送る」を押すとここに集計されます</p>
                                                 </div>
                                             ) : (
                                                 savedTallies.map(t => (
@@ -1619,13 +1628,13 @@
                                                             className="p-2.5 flex items-center justify-between cursor-pointer hover:bg-[#1a1a1e]"
                                                         >
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-sm font-bold text-white">{t.name}</span>
-                                                                <span className="text-[10px] text-orange-400 bg-orange-950/60 border border-orange-500/40 px-1.5 py-0.2 rounded font-mono font-bold">
-                                                                    定尺:{formatNumber(toNum(t.std))}
+                                                                <span className="text-base font-bold text-white">{t.name}</span>
+                                                                <span className="text-[15px] text-orange-400 bg-orange-950/60 border border-orange-500/40 px-1.5 py-0.2 rounded font-mono font-bold">
+                                                                    材料:{formatNumber(toNum(t.std))}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-3">
-                                                                <div className="flex gap-2.5 text-xs font-mono">
+                                                                <div className="flex gap-2.5 text-[15px] font-mono">
                                                                     <span>総距離: <strong className="text-white">{formatNumber(t.totalDistance)}</strong></span>
                                                                     <span>本数: <strong className="text-green-400 font-bold">{t.pieces}本</strong></span>
                                                                     <span>端材: <strong className="text-blue-400">{formatNumber(t.totalRemainder)}</strong></span>
@@ -1636,10 +1645,10 @@
 
                                                         {expandedTallyId === t.id && t.details && (
                                                             <div className="bg-[#18181b] px-3.5 py-2 border-t border-[#2c2c2e] space-y-1">
-                                                                <span className="text-[10px] font-bold text-zinc-400 uppercase block mb-0.5">内訳詳細</span>
+                                                                <span className="text-[15px] font-bold text-zinc-400 uppercase block mb-0.5">内訳詳細</span>
                                                                 {t.details.map((detail, idx) => (
-                                                                    <div key={detail.id || idx} className="flex justify-between items-center text-xs font-mono py-0.5 border-b border-zinc-800/40 last:border-none">
-                                                                        <span className="text-zinc-300">施工長: {formatNumber(toNum(detail.total))} mm (定尺: {formatNumber(toNum(detail.std))})</span>
+                                                                    <div key={detail.id || idx} className="flex justify-between items-center text-[15px] font-mono py-0.5 border-b border-zinc-800/40 last:border-none">
+                                                                        <span className="text-zinc-300">施工長: {formatNumber(toNum(detail.total))} mm (材料: {formatNumber(toNum(detail.std))})</span>
                                                                         <div className="flex gap-3">
                                                                             <span className="text-green-400 font-bold">{detail.pieces} 本</span>
                                                                             <span className="text-blue-400">端材: {formatNumber(toNum(detail.remainder))} mm</span>
@@ -1659,18 +1668,18 @@
 
                         {/* 3. 金物割付 (結果カードをテンキー直下へ配置・右画面最大化) */}
                         {currentAppTab === 'kanamono' && (
-                            <div className="grid grid-cols-2 gap-3 items-start">
+                            <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-1.5 min-w-0 bg-[#18181b] p-2.5 rounded-xl border border-[#2c2c2e] shadow-lg">
                                     <div className="flex items-center justify-between border-b border-[#2c2c2e] pb-1">
-                                        <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                                        <h2 className="text-[15px] font-bold text-white flex items-center gap-1.5">
                                             <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
                                             金物割付 パラメータ
                                         </h2>
                                         <div className="flex items-center gap-2">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${kIsAutoMode ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
+                                            <span className={`text-[15px] font-bold px-2.5 py-1 rounded-full border ${kIsAutoMode ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
                                                 自動連動: {kIsAutoMode ? 'ON' : 'OFF'}
                                             </span>
-                                            <span className="text-[10px] text-zinc-400">タップして選択</span>
+                                            <span className="text-[15px] text-zinc-400">タップして選択</span>
                                         </div>
                                     </div>
 
@@ -1680,14 +1689,14 @@
                                             className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'pitch' ? 'border-[#0a84ff] bg-[#0a84ff]/15 ring-2 ring-[#0a84ff]' : (kanamonoResult.mode === 'pitch-driven' ? 'border-[#0a84ff]/60 bg-[#121214]' : 'border-[#2c2c2e] bg-[#121214]')}`}
                                         >
                                             <div className="flex justify-between items-center mb-0.5">
-                                                <label className="text-[11px] font-bold text-[#0a84ff] flex items-center gap-1">
+                                                <label className="text-[15px] font-bold text-[#0a84ff] flex items-center gap-1">
                                                     働き (@)
-                                                    {kanamonoResult.mode === 'pitch-driven' && <span className="text-orange-400 text-xs">★</span>}
+                                                    {kanamonoResult.mode === 'pitch-driven' && <span className="text-orange-400 text-[15px]">★</span>}
                                                 </label>
-                                                <span className="text-[10px] text-zinc-400 font-mono">mm</span>
+                                                <span className="text-[15px] text-zinc-400 font-mono">mm</span>
                                             </div>
                                             <div className="text-2xl font-black font-mono text-[#0a84ff] text-center h-6 flex items-center justify-center">
-                                                {kInputs.pitch ? parseFloat(kInputs.pitch).toLocaleString('ja-JP') : <span className="text-zinc-600 text-sm">0</span>}
+                                                {kInputs.pitch ? parseFloat(kInputs.pitch).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">0</span>}
                                             </div>
                                         </div>
 
@@ -1696,14 +1705,14 @@
                                             className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'count' ? 'border-[#30d158] bg-[#30d158]/15 ring-2 ring-[#30d158]' : (kanamonoResult.mode === 'count-driven' ? 'border-[#30d158]/60 bg-[#121214]' : 'border-[#2c2c2e] bg-[#121214]')}`}
                                         >
                                             <div className="flex justify-between items-center mb-0.5">
-                                                <label className="text-[11px] font-bold text-[#30d158] flex items-center gap-1">
+                                                <label className="text-[15px] font-bold text-[#30d158] flex items-center gap-1">
                                                     本数 (N)
-                                                    {kanamonoResult.mode === 'count-driven' && <span className="text-orange-400 text-xs">★</span>}
+                                                    {kanamonoResult.mode === 'count-driven' && <span className="text-orange-400 text-[15px]">★</span>}
                                                 </label>
-                                                <span className="text-[10px] text-zinc-400 font-mono">本</span>
+                                                <span className="text-[15px] text-zinc-400 font-mono">本</span>
                                             </div>
                                             <div className="text-2xl font-black font-mono text-[#30d158] text-center h-6 flex items-center justify-center">
-                                                {kInputs.count ? parseFloat(kInputs.count).toLocaleString('ja-JP') : <span className="text-zinc-600 text-sm">0</span>}
+                                                {kInputs.count ? parseFloat(kInputs.count).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">0</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -1713,11 +1722,11 @@
                                         className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'totalLength' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#444446] bg-[#121214]'}`}
                                     >
                                         <div className="flex justify-between items-center mb-0.5">
-                                            <label className="text-[11px] font-black text-zinc-300">全幅 (W) - 取り付け幅</label>
-                                            <span className="text-[10px] text-orange-400 font-mono">mm</span>
+                                            <label className="text-[15px] font-black text-zinc-300">全幅 (W) - 取り付け幅</label>
+                                            <span className="text-[15px] text-orange-400 font-mono">mm</span>
                                         </div>
                                         <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
-                                            {kInputs.totalLength ? parseFloat(kInputs.totalLength).toLocaleString('ja-JP') : <span className="text-zinc-600 text-sm">全幅を入力</span>}
+                                            {kInputs.totalLength ? parseFloat(kInputs.totalLength).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">全幅を入力</span>}
                                         </div>
                                     </div>
 
@@ -1736,7 +1745,7 @@
                                             <button type="button" onClick={() => handleCurrentKeypad('1')} className="h-11 rounded-lg text-xl keypad-btn kp-large-num">1</button>
                                             <button type="button" onClick={() => handleCurrentKeypad('2')} className="h-11 rounded-lg text-xl keypad-btn kp-large-num">2</button>
                                             <button type="button" onClick={() => handleCurrentKeypad('3')} className="h-11 rounded-lg text-xl keypad-btn kp-large-num">3</button>
-                                            <button type="button" onClick={() => handleCurrentKeypad('⏎')} className="row-span-2 rounded-lg text-sm keypad-btn kp-large-save flex items-center justify-center gap-1">
+                                            <button type="button" onClick={() => handleCurrentKeypad('⏎')} className="row-span-2 rounded-lg text-base keypad-btn kp-large-save flex items-center justify-center gap-1">
                                                 <Icon name="returnKey" size={16} /> 次へ
                                             </button>
 
@@ -1745,10 +1754,10 @@
                                             <button
                                                 type="button"
                                                 onClick={() => handleCurrentKeypad('autoToggle')}
-                                                className={`h-11 rounded-lg text-xs keypad-btn flex flex-col items-center justify-center font-bold border ${kIsAutoMode ? 'bg-[#ff9500]/20 text-[#ff9f0a] border-orange-500/60' : 'bg-[#323236] text-zinc-400 border-[#3e3e42]'}`}
+                                                className={`h-11 rounded-lg text-[15px] keypad-btn flex flex-col items-center justify-center font-bold border ${kIsAutoMode ? 'bg-[#ff9500]/20 text-[#ff9f0a] border-orange-500/60' : 'bg-[#323236] text-zinc-400 border-[#3e3e42]'}`}
                                             >
                                                 <span>自 動</span>
-                                                <span className="text-[9px]">{kIsAutoMode ? 'ON' : 'OFF'}</span>
+                                                <span className="text-[15px]">{kIsAutoMode ? 'ON' : 'OFF'}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -1757,40 +1766,40 @@
                                     <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-[#2c2c2e]">
                                         <div className={`p-2 rounded-xl border-2 transition-all ${kanamonoResult.mode === 'pitch-driven' ? 'border-[#0a84ff] bg-[#0a84ff]/10 shadow-md ring-1 ring-[#0a84ff]' : 'border-[#2c2c2e] bg-[#121214]'}`}>
                                             <div className="flex justify-between items-center mb-0.5 border-b border-[#2c2c2e] pb-0.5">
-                                                <span className="text-xs font-bold text-[#0a84ff]">
+                                                <span className="text-[15px] font-bold text-[#0a84ff]">
                                                     働き計算 {kanamonoResult.mode === 'pitch-driven' && '★'}
                                                 </span>
-                                                <span className="text-[10px] text-zinc-400 uppercase">本数 / 余り</span>
+                                                <span className="text-[15px] text-zinc-400 uppercase">本数 / 余り</span>
                                             </div>
                                             <div className="flex items-baseline justify-around pt-0.5">
                                                 <div>
                                                     <span className="text-2xl font-mono font-black text-white">{kanamonoResult.resQty}</span>
-                                                    <span className="text-xs text-zinc-400 ml-0.5">本</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">本</span>
                                                 </div>
                                                 <span className="text-zinc-600 text-lg font-bold">/</span>
                                                 <div>
                                                     <span className="text-2xl font-mono font-black text-zinc-200">{kanamonoResult.resQtyRem}</span>
-                                                    <span className="text-xs text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className={`p-2 rounded-xl border-2 transition-all ${kanamonoResult.mode === 'count-driven' ? 'border-[#30d158] bg-[#30d158]/10 shadow-md ring-1 ring-[#30d158]' : 'border-[#2c2c2e] bg-[#121214]'}`}>
                                             <div className="flex justify-between items-center mb-0.5 border-b border-[#2c2c2e] pb-0.5">
-                                                <span className="text-xs font-bold text-[#30d158]">
+                                                <span className="text-[15px] font-bold text-[#30d158]">
                                                     本数計算 {kanamonoResult.mode === 'count-driven' && '★'}
                                                 </span>
-                                                <span className="text-[10px] text-zinc-400 uppercase">働き / 余り</span>
+                                                <span className="text-[15px] text-zinc-400 uppercase">働き / 余り</span>
                                             </div>
                                             <div className="flex items-baseline justify-around pt-0.5">
                                                 <div>
                                                     <span className="text-2xl font-mono font-black text-white">{kanamonoResult.resWidth}</span>
-                                                    <span className="text-xs text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                                 <span className="text-zinc-600 text-lg font-bold">/</span>
                                                 <div>
                                                     <span className="text-2xl font-mono font-black text-zinc-200">{kanamonoResult.resWidthRem}</span>
-                                                    <span className="text-xs text-zinc-400 ml-0.5">㎜</span>
+                                                    <span className="text-[15px] text-zinc-400 ml-0.5">㎜</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1801,18 +1810,18 @@
                                     <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
                                         <div className="px-3.5 py-2.5 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-xs font-bold text-white">割付表 (墨出し寸法)</h3>
-                                                <span className="text-[11px] font-bold text-white bg-[#121214] border border-[#3a3a3c] px-2 py-0.5 rounded font-mono">
+                                                <h3 className="text-[15px] font-bold text-white">割付表 (墨出し寸法)</h3>
+                                                <span className="text-[15px] font-bold text-white bg-[#121214] border border-[#3a3a3c] px-2.5 py-1 rounded font-mono">
                                                     全幅: <strong className="text-orange-400">{kanamonoResult.L ? kanamonoResult.L.toLocaleString() : '-'}</strong> ㎜
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] bg-orange-500 text-black px-2 py-0.5 rounded font-black tracking-wider shadow-sm">
+                                            <span className="text-[15px] bg-orange-500 text-black px-2.5 py-1 rounded font-black tracking-wider shadow-sm">
                                                 墨出し寸法
                                             </span>
                                         </div>
 
                                         <div className="overflow-y-auto max-h-[calc(100vh-140px)] custom-scrollbar">
-                                            <table className="w-full text-center border-collapse text-xs">
+                                            <table className="w-full text-center border-collapse text-[15px]">
                                                 <thead className="sticky top-0 bg-[#242426] text-zinc-400 border-b border-[#2c2c2e] z-10 font-bold">
                                                     <tr>
                                                         <th className="py-2.5 px-2 w-14 border-r border-[#2c2c2e]">No.</th>
@@ -1862,13 +1871,13 @@
                                                         <td className="py-2.5 border-r border-[#2c2c2e] text-zinc-300">合計</td>
                                                         {kanamonoResult.showPitch && (
                                                             <td className={`py-2.5 text-[#0a84ff] ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e]' : ''}`}>
-                                                                <span className="text-[10px] block opacity-70">働き計算 本数</span>
+                                                                <span className="text-[15px] block opacity-70">働き計算 本数</span>
                                                                 <span className="text-base font-mono">{kanamonoResult.resQty} 本</span>
                                                             </td>
                                                         )}
                                                         {kanamonoResult.showCount && (
                                                             <td className="py-2.5 text-[#30d158]">
-                                                                <span className="text-[10px] block opacity-70">本数計算 働き幅</span>
+                                                                <span className="text-[15px] block opacity-70">本数計算 働き幅</span>
                                                                 <span className="text-base font-mono">{kanamonoResult.resWidth} ㎜</span>
                                                             </td>
                                                         )}
@@ -1883,17 +1892,17 @@
 
                         {/* 4. 勾配 寸法計算 */}
                         {currentAppTab === 'slope' && (
-                            <div className="grid grid-cols-2 gap-3 items-start">
+                            <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-2 min-w-0 bg-[#1c1c1e] p-3 rounded-xl border border-[#2c2c2e] shadow-lg">
                                     <div className="flex items-center justify-between pb-1 border-b border-[#2c2c2e]">
-                                        <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                                        <h2 className="text-[15px] font-bold text-white flex items-center gap-1.5">
                                             <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
                                             設計寸法 入力
                                         </h2>
                                         <button
                                             type="button"
                                             onClick={resetSlopeInputs}
-                                            className="px-2 py-0.5 bg-[#2c2c2e] hover:bg-[#3a3a3c] text-red-400 text-[10px] font-bold rounded border border-[#48484a]"
+                                            className="px-2 py-0.5 bg-[#2c2c2e] hover:bg-[#3a3a3c] text-red-400 text-[15px] font-bold rounded border border-[#48484a]"
                                         >
                                             全クリア
                                         </button>
@@ -1904,7 +1913,7 @@
                                             onClick={() => { setSlopeActiveField('L1'); setSlopeIsNewEntry(true); }}
                                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${slopeActiveField === 'L1' ? 'border-[#30d158] bg-[#30d158]/15 ring-2 ring-[#30d158]' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-[#30d158]">基準側 L1 (mm)</label>
+                                            <label className="text-[15px] font-bold text-[#30d158]">基準側 L1 (mm)</label>
                                             <div className="text-lg font-bold text-white text-right h-6 flex items-center justify-end font-mono">
                                                 {sL1 || '0'}
                                             </div>
@@ -1914,7 +1923,7 @@
                                             onClick={() => { setSlopeActiveField('L2'); setSlopeIsNewEntry(true); }}
                                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${slopeActiveField === 'L2' ? 'border-[#30d158] bg-[#30d158]/15 ring-2 ring-[#30d158]' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-[#30d158]">延長側 L2 (mm)</label>
+                                            <label className="text-[15px] font-bold text-[#30d158]">延長側 L2 (mm)</label>
                                             <div className="text-lg font-bold text-white text-right h-6 flex items-center justify-end font-mono">
                                                 {sL2 || '0'}
                                             </div>
@@ -1924,7 +1933,7 @@
                                             onClick={() => { setSlopeActiveField('W'); setSlopeIsNewEntry(true); }}
                                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${slopeActiveField === 'W' ? 'border-[#0a84ff] bg-[#0a84ff]/15 ring-2 ring-[#0a84ff]' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-[#0a84ff]">全体の幅 W (mm)</label>
+                                            <label className="text-[15px] font-bold text-[#0a84ff]">全体の幅 W (mm)</label>
                                             <div className="text-lg font-bold text-white text-right h-6 flex items-center justify-end font-mono">
                                                 {sW || '0'}
                                             </div>
@@ -1934,7 +1943,7 @@
                                             onClick={() => { setSlopeActiveField('Pitch'); setSlopeIsNewEntry(true); }}
                                             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${slopeActiveField === 'Pitch' ? 'border-[#bf5af2] bg-[#bf5af2]/15 ring-2 ring-[#bf5af2]' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[10px] font-bold text-[#bf5af2]">働き幅 ＠ (mm)</label>
+                                            <label className="text-[15px] font-bold text-[#bf5af2]">働き幅 ＠ (mm)</label>
                                             <div className="text-lg font-bold text-white text-right h-6 flex items-center justify-end font-mono">
                                                 {sPitch || '0'}
                                             </div>
@@ -1966,11 +1975,11 @@
 
                                     <div className="rounded-lg border border-[#2c2c2e] overflow-hidden flex flex-col mt-1">
                                         <div className="bg-[#242426] px-2 py-0.5 flex justify-between items-center border-b border-[#2c2c2e]">
-                                            <span className="text-[10px] font-bold text-white">ピッチ別 屋根長さ詳細</span>
-                                            <span className="text-[9px] text-zinc-400">単位: mm</span>
+                                            <span className="text-[15px] font-bold text-white">ピッチ別 屋根長さ詳細</span>
+                                            <span className="text-[15px] text-zinc-400">単位: mm</span>
                                         </div>
                                         <div className="overflow-y-auto max-h-[140px] custom-scrollbar">
-                                            <table className="result-table w-full border-collapse bg-[#121214] text-[10px]">
+                                            <table className="result-table w-full border-collapse bg-[#121214] text-[15px]">
                                                 <thead className="sticky top-0 bg-[#1c1c1e] z-10 text-zinc-400">
                                                     <tr>
                                                         <th className="w-10 text-[#ff9f0a] py-0.5 font-bold">No.</th>
@@ -1991,20 +2000,20 @@
                                                                     <td className={`text-center font-semibold py-0.5 ${r.isStart ? "text-[#8e8e93]" : "text-[#0a84ff]"}`}>
                                                                         {r.dist.toLocaleString()}
                                                                     </td>
-                                                                    <td className={`text-center font-bold text-xs ${r.isStart ? "text-[#8e8e93]" : "text-[#30d158]"} py-0.5`}>
+                                                                    <td className={`text-center font-bold text-[15px] ${r.isStart ? "text-[#8e8e93]" : "text-[#30d158]"} py-0.5`}>
                                                                         {r.height.toLocaleString()}
                                                                     </td>
                                                                 </tr>
                                                             ))}
                                                             <tr className="bg-[#242426]">
-                                                                <td className="text-center font-bold text-[#aeaeb2] py-0.5 text-[9px]">端材</td>
+                                                                <td className="text-center font-bold text-[#aeaeb2] py-0.5 text-[15px]">端材</td>
                                                                 <td className="text-center text-[#0a84ff] py-0.5">
-                                                                    <span className="text-[8px] text-zinc-400 block">働き端材:</span>
+                                                                    <span className="text-[15px] text-zinc-400 block">働き端材:</span>
                                                                     <span className="font-bold">{Math.round(slopeResult.scrapW).toLocaleString()}</span>
                                                                 </td>
                                                                 <td className="text-center text-[#30d158] py-0.5">
-                                                                    <span className="text-[8px] text-zinc-400 block">長さ端材:</span>
-                                                                    <span className="font-bold text-xs">{Math.round(slopeResult.scrapL).toLocaleString()}</span>
+                                                                    <span className="text-[15px] text-zinc-400 block">長さ端材:</span>
+                                                                    <span className="font-bold text-[15px]">{Math.round(slopeResult.scrapL).toLocaleString()}</span>
                                                                 </td>
                                                             </tr>
                                                         </>
@@ -2018,36 +2027,36 @@
                                 <div className="flex flex-col gap-2.5 min-w-0">
                                     <div className="bg-[#1c1c1e] p-3 rounded-xl border border-[#2c2c2e] shadow-md flex flex-col gap-2">
                                         <div className="flex items-center justify-between pb-1 border-b border-[#2c2c2e]">
-                                            <span className="text-xs font-bold text-white">計算結果 概要</span>
+                                            <span className="text-[15px] font-bold text-white">計算結果 概要</span>
                                             <button
                                                 type="button"
                                                 onClick={shareOrCopySlopeData}
-                                                className="px-2.5 py-0.5 bg-[#0a84ff] hover:bg-[#0071e3] text-white text-[11px] font-bold rounded flex items-center gap-1 shadow-sm"
+                                                className="px-2.5 py-0.5 bg-[#0a84ff] hover:bg-[#0071e3] text-white text-[15px] font-bold rounded flex items-center gap-1 shadow-sm"
                                             >
                                                 <Icon name="copy" size={13} /> 結果をコピー
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-4 gap-1.5 text-center">
                                             <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
-                                                <span className="block text-[10px] font-bold text-[#0a84ff]">延長後 幅</span>
+                                                <span className="block text-[15px] font-bold text-[#0a84ff]">延長後 幅</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(slopeResult.newB).toLocaleString() : '-'}
                                                 </span>
                                             </div>
                                             <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
-                                                <span className="block text-[10px] font-bold text-[#30d158]">延長後 L2</span>
+                                                <span className="block text-[15px] font-bold text-[#30d158]">延長後 L2</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(slopeResult.newC).toLocaleString() : '-'}
                                                 </span>
                                             </div>
                                             <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
-                                                <span className="block text-[10px] font-bold text-[#ff9f0a]">総枚数</span>
+                                                <span className="block text-[15px] font-bold text-[#ff9f0a]">総枚数</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? `${slopeResult.count}枚` : '-'}
                                                 </span>
                                             </div>
                                             <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
-                                                <span className="block text-[10px] font-bold text-[#bf5af2]">増分/枚</span>
+                                                <span className="block text-[15px] font-bold text-[#bf5af2]">増分/枚</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(Math.abs(slopeResult.step)).toLocaleString() : '-'}
                                                 </span>
@@ -2057,8 +2066,8 @@
 
                                     <div className="bg-[#1c1c1e] border border-[#2c2c2e] rounded-xl p-3 shadow-lg flex flex-col h-full min-h-[440px]">
                                         <div className="flex items-center justify-between mb-2">
-                                            <h3 className="text-xs font-semibold text-[#8e8e93] uppercase tracking-wide">勾配 断面形状図</h3>
-                                            <span className="text-[11px] text-[#8e8e93]">クリックで拡大プレビュー</span>
+                                            <h3 className="text-[15px] font-semibold text-[#8e8e93] uppercase tracking-wide">勾配 断面形状図</h3>
+                                            <span className="text-[15px] text-[#8e8e93]">クリックで拡大プレビュー</span>
                                         </div>
                                         <div
                                             className="w-full flex-1 bg-[#121214] border border-[#2c2c2e] rounded-lg overflow-hidden cursor-pointer relative min-h-[400px] flex items-center justify-center"
@@ -2066,7 +2075,7 @@
                                         >
                                             <canvas ref={slopeCanvasRef} className="w-full h-full block"></canvas>
                                             {!slopeResult.hasResult && (
-                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-xs font-bold">
+                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-[15px] font-bold">
                                                     寸法を入力すると断面図が描画されます
                                                 </div>
                                             )}
@@ -2078,7 +2087,7 @@
                     </main>
 
                     {toastMessage && (
-                        <div className="fixed bottom-5 right-5 bg-[#2c2c2e] text-white px-3.5 py-2 rounded-lg shadow-2xl border border-[#48484a] flex items-center gap-2 z-50 animate-bounce text-xs">
+                        <div className="fixed bottom-5 right-5 bg-[#2c2c2e] text-white px-3.5 py-2 rounded-lg shadow-2xl border border-[#48484a] flex items-center gap-2 z-50 animate-bounce text-[15px]">
                             <Icon name="check" size={14} className="text-[#30d158]" />
                             <span className="font-medium">{toastMessage}</span>
                         </div>
@@ -2088,7 +2097,7 @@
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-6" onClick={() => setIsZoomOpen(false)}>
                             <div className="relative max-w-5xl w-full max-h-[90vh] bg-[#1c1c1e] border border-[#3a3a3c] rounded-2xl p-4 flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-sm font-semibold text-white">勾配 断面図 拡大表示</span>
+                                    <span className="text-base font-semibold text-white">勾配 断面図 拡大表示</span>
                                     <button type="button" onClick={() => setIsZoomOpen(false)} className="text-[#8e8e93] hover:text-white p-1 rounded-lg">
                                         <Icon name="close" size={20} />
                                     </button>
@@ -2104,10 +2113,10 @@
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
                             <div className="bg-[#1c1c20] border border-[#3e3e44] rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
                                 <h3 className="text-lg font-bold text-white">割付履歴の全削除</h3>
-                                <p className="text-sm text-zinc-400">すべての割付計算履歴を削除します。よろしいですか？</p>
+                                <p className="text-base text-zinc-400">すべての割付計算履歴を削除します。よろしいですか？</p>
                                 <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setWConfirmClear(false)} className="flex-1 py-2.5 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setWHistory([]); localStorage.removeItem('waritsuke_history_v14'); setWConfirmClear(false); }} className="flex-1 py-2.5 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
+                                    <button onClick={() => setWConfirmClear(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
+                                    <button onClick={() => { setWHistory([]); localStorage.removeItem('waritsuke_history_v14'); setWConfirmClear(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
                                 </div>
                             </div>
                         </div>
@@ -2117,10 +2126,10 @@
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
                             <div className="bg-[#1c1c20] border border-[#3e3e44] rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
                                 <h3 className="text-lg font-bold text-white">役物履歴の全削除</h3>
-                                <p className="text-sm text-zinc-400">保存された役物履歴をすべて削除します。よろしいですか？</p>
+                                <p className="text-base text-zinc-400">保存された役物履歴をすべて削除します。よろしいですか？</p>
                                 <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setIsClearModalOpen(false)} className="flex-1 py-2.5 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setHistory([]); localStorage.removeItem('trim_calc_history_v15'); setIsClearModalOpen(false); }} className="flex-1 py-2.5 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
+                                    <button onClick={() => setIsClearModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
+                                    <button onClick={() => { setHistory([]); localStorage.removeItem('trim_calc_history_v15'); setIsClearModalOpen(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
                                 </div>
                             </div>
                         </div>
@@ -2130,10 +2139,10 @@
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
                             <div className="bg-[#1c1c20] border border-[#3e3e44] rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
                                 <h3 className="text-lg font-bold text-white">集計の全削除</h3>
-                                <p className="text-sm text-zinc-400">品名別の集計データをすべて削除します。よろしいですか？</p>
+                                <p className="text-base text-zinc-400">品名別の集計データをすべて削除します。よろしいですか？</p>
                                 <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setIsTallyClearModalOpen(false)} className="flex-1 py-2.5 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setSavedTallies([]); localStorage.removeItem('trim_calc_tallies_v15'); setIsTallyClearModalOpen(false); }} className="flex-1 py-2.5 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
+                                    <button onClick={() => setIsTallyClearModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
+                                    <button onClick={() => { setSavedTallies([]); localStorage.removeItem('trim_calc_tallies_v15'); setIsTallyClearModalOpen(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
                                 </div>
                             </div>
                         </div>

@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
     <link rel="apple-touch-icon" href="./icon-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -107,7 +106,11 @@
                 copy: <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
                 check: <path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
                 close: <path d="M6 18L18 6M6 6l12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
-                returnKey: <path d="M9 10l-5 5 5 5M4 15h11a5 5 0 0 0 5-5V7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                returnKey: <path d="M9 10l-5 5 5 5M4 15h11a5 5 0 0 0 5-5V7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />,
+                cloud: <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
+                zoom: <path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm10 2l-4.35-4.35M11 8v6M8 11h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
+                eye: <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
+                eyeOff: <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             };
             return (
                 <svg width={size} height={size} viewBox="0 0 24 24" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -245,14 +248,14 @@
 
                 const nextHistory = [entry, ...wHistory];
                 setWHistory(nextHistory);
-                localStorage.setItem('waritsuke_history_v14', JSON.stringify(nextHistory));
+                try { localStorage.setItem('waritsuke_history_v14', JSON.stringify(nextHistory)); } catch(e) {}
                 showToast('割付結果を保存しました');
             };
 
             const deleteWHistoryRow = (id) => {
                 const next = wHistory.filter(item => item.id !== id);
                 setWHistory(next);
-                localStorage.setItem('waritsuke_history_v14', JSON.stringify(next));
+                try { localStorage.setItem('waritsuke_history_v14', JSON.stringify(next)); } catch(e) {}
             };
 
             const memoSummary = useMemo(() => {
@@ -354,8 +357,12 @@
             // 2. 役物材料 計算
             // ==========================================
             const [currentProductName, setCurrentProductName] = useState('No.1');
-            const [stdLength, setStdLength] = useState(() => localStorage.getItem('trim_calc_stdLength_v15') || '3000');
-            const [overlap, setOverlap] = useState(() => localStorage.getItem('trim_calc_overlap_v15') || '50');
+            const [stdLength, setStdLength] = useState(() => {
+                try { return localStorage.getItem('trim_calc_stdLength_v15') || '3000'; } catch(e) { return '3000'; }
+            });
+            const [overlap, setOverlap] = useState(() => {
+                try { return localStorage.getItem('trim_calc_overlap_v15') || '50'; } catch(e) { return '50'; }
+            });
             const [totalDim, setTotalDim] = useState('');
             const [addInput, setAddInput] = useState('');
             const [expandedTallyId, setExpandedTallyId] = useState(null);
@@ -371,11 +378,11 @@
             });
 
             useEffect(() => {
-                localStorage.setItem('trim_calc_stdLength_v15', stdLength);
+                try { localStorage.setItem('trim_calc_stdLength_v15', stdLength); } catch(e) {}
             }, [stdLength]);
 
             useEffect(() => {
-                localStorage.setItem('trim_calc_overlap_v15', overlap);
+                try { localStorage.setItem('trim_calc_overlap_v15', overlap); } catch(e) {}
             }, [overlap]);
 
             const executeTrimAddition = () => {
@@ -401,7 +408,6 @@
                 return { pieces: 0, remainder: 0 };
             }, [totalDim, stdLength, overlap]);
 
-            // 保存キーで直接「品名別 集計」に保存・集計
             const saveTrimDirectToTally = () => {
                 if (materialResult.pieces === 0 || stdLength === '') {
                     showToast('保存する計算結果がありません');
@@ -447,9 +453,8 @@
                 }
 
                 setSavedTallies(updatedTallies);
-                localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updatedTallies));
+                try { localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updatedTallies)); } catch(e) {}
                 
-                // 全長の値は保持し、加算入力欄のみクリア（次回テンキー押下時は新規上書き可能）
                 setAddInput('');
                 setTrimIsNewEntry(true);
                 setTrimActiveField('totalDim');
@@ -459,7 +464,7 @@
             const deleteTallyItem = (id) => {
                 const updated = savedTallies.filter(t => t.id !== id);
                 setSavedTallies(updated);
-                localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updated));
+                try { localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updated)); } catch(e) {}
                 showToast('品名の集計を削除しました');
             };
 
@@ -524,7 +529,7 @@
             };
 
             // ==========================================
-            // 3. 金物割付 (始まり寸法・チリのタップ変更対応版)
+            // 3. 金物割付
             // ==========================================
             const [kInputs, setKInputs] = useState(() => {
                 try {
@@ -611,10 +616,8 @@
                 let listWidth = [];
 
                 if (!isNaN(L) && L > 0) {
-                    // 両端の始まり寸法Sを考慮した内々有効寸法
                     const effL = Math.max(0, L - (2 * S));
 
-                    // 1. 働き計算 (@基準)
                     if (!isNaN(W) && W > 0) {
                         if (effL > 0) {
                             const qty = Math.floor(effL / W) + 1;
@@ -622,7 +625,6 @@
                             resQty = qty.toLocaleString();
                             resQtyRem = Math.round(rem).toLocaleString();
 
-                            // 端振り：始まりSに余りの半分を加算して割り付け
                             let pos = S + (rem / 2);
                             for (let i = 0; i < qty; i++) {
                                 listQty.push(Math.round(pos));
@@ -635,7 +637,6 @@
                         }
                     }
 
-                    // 2. 本数計算 (N基準: ユーザー要望の 100, 1250, 2400)
                     if (!isNaN(N) && N > 1) {
                         if (effL >= 0) {
                             const pitchVal = (N > 1) ? Math.floor(effL / (N - 1)) : 0;
@@ -649,7 +650,6 @@
                                 } else if (i === N - 1) {
                                     listWidth.push(Math.round(L - S));
                                 } else {
-                                    // S から (L - 2S) の区間を等分配置 (丸め誤差防止)
                                     const pos = S + Math.round((effL * i) / (N - 1));
                                     listWidth.push(pos);
                                 }
@@ -805,13 +805,18 @@
             const [slopeActiveField, setSlopeActiveField] = useState('W');
             const [slopeIsNewEntry, setSlopeIsNewEntry] = useState(true);
             const [isZoomOpen, setIsZoomOpen] = useState(false);
+            const [isPitchZoomOpen, setIsPitchZoomOpen] = useState(false);
+            const [isKanamonoZoomOpen, setIsKanamonoZoomOpen] = useState(false);
             const [zoomImgSrc, setZoomImgSrc] = useState('');
+            const [isDiagramVisible, setIsDiagramVisible] = useState(true);
             const slopeCanvasRef = useRef(null);
 
             useEffect(() => {
-                localStorage.setItem('slope_calc_mac_state', JSON.stringify({
-                    L1: sL1, L2: sL2, W: sW, Pitch: sPitch
-                }));
+                try {
+                    localStorage.setItem('slope_calc_mac_state', JSON.stringify({
+                        L1: sL1, L2: sL2, W: sW, Pitch: sPitch
+                    }));
+                } catch(e) {}
             }, [sL1, sL2, sW, sPitch]);
 
             const slopeResult = useMemo(() => {
@@ -858,34 +863,21 @@
                 };
             }, [sL1, sL2, sW, sPitch]);
 
-            const drawSlopeCanvas = () => {
-                const canvas = slopeCanvasRef.current;
-                if (!canvas) return;
-                const container = canvas.parentElement;
-                if (!container) return;
-                const dpr = window.devicePixelRatio || 1;
-                const rect = container.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) return;
-
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                const ctx = canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                ctx.clearRect(0, 0, rect.width, rect.height);
-
+            // 共通描画ロジック（オンスクリーン・オフスクリーン兼用）
+            const renderSlopeDiagram = (ctx, width, height) => {
+                ctx.clearRect(0, 0, width, height);
                 if (!slopeResult.hasResult) return;
 
                 const { a, b: origB, c: origC, newB, newC, count, interval } = slopeResult;
-
-                const padding = { l: 50, r: 50, t: 40, b: 50 };
-                const drawW = rect.width - (padding.l + padding.r);
-                const drawH = rect.height - (padding.t + padding.b);
+                const padding = { l: 60, r: 60, t: 45, b: 55 };
+                const drawW = width - (padding.l + padding.r);
+                const drawH = height - (padding.t + padding.b);
                 const scaleX = drawW / (newB || 1);
                 const maxHeight = Math.max(a, newC, origC);
                 const scaleY = drawH / (maxHeight || 1);
 
                 const tx = (x) => padding.l + x * scaleX;
-                const ty = (y) => rect.height - padding.b - y * scaleY;
+                const ty = (y) => height - padding.b - y * scaleY;
 
                 ctx.beginPath();
                 ctx.strokeStyle = '#222226';
@@ -966,32 +958,54 @@
                 if (origB !== newB && newB > 0) {
                     ctx.fillStyle = "#8e8e93";
                     ctx.font = "12px -apple-system, sans-serif";
-                    ctx.fillText(`全体幅: ${Math.round(newB)} (端材 ${Math.round(newB - origB)})`, tx(newB / 2), ty(0) + 36);
+                    ctx.fillText(`全体幅: ${Math.round(newB)} (端材 ${Math.round(newB - origB)})`, tx(newB / 2), ty(0) + 38);
                 }
             };
 
+            const drawSlopeCanvas = () => {
+                if (!isDiagramVisible) return;
+                const canvas = slopeCanvasRef.current;
+                if (!canvas) return;
+                const container = canvas.parentElement;
+                if (!container) return;
+                const dpr = window.devicePixelRatio || 1;
+                const rect = container.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return;
+
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+                renderSlopeDiagram(ctx, rect.width, rect.height);
+            };
+
             useEffect(() => {
-                if (currentAppTab === 'slope') {
-                    // タブ切り替え直後のレイアウト計算遅延を考慮し、requestAnimationFrameで確実に描画
-                    const rafId = requestAnimationFrame(() => {
-                        drawSlopeCanvas();
-                    });
+                if (currentAppTab === 'slope' && isDiagramVisible) {
+                    const rafId = requestAnimationFrame(() => drawSlopeCanvas());
                     return () => cancelAnimationFrame(rafId);
                 }
-            }, [currentAppTab, slopeResult]);
+            }, [currentAppTab, slopeResult, isDiagramVisible]);
 
             useEffect(() => {
                 const handleResize = () => {
-                    if (currentAppTab === 'slope') drawSlopeCanvas();
+                    if (currentAppTab === 'slope' && isDiagramVisible) drawSlopeCanvas();
                 };
                 window.addEventListener('resize', handleResize);
                 return () => window.removeEventListener('resize', handleResize);
-            }, [currentAppTab, slopeResult]);
+            }, [currentAppTab, slopeResult, isDiagramVisible]);
 
+            // 非表示状態でもオフスクリーンで高品質描画して拡大モーダルを開く
             const openZoom = () => {
-                const canvas = slopeCanvasRef.current;
-                if (!canvas || !slopeResult.hasResult) return;
-                setZoomImgSrc(canvas.toDataURL('image/png'));
+                if (!slopeResult.hasResult) {
+                    showToast('断面図を表示するための寸法が未入力です');
+                    return;
+                }
+                const offscreen = document.createElement('canvas');
+                offscreen.width = 960;
+                offscreen.height = 540;
+                const offCtx = offscreen.getContext('2d');
+                renderSlopeDiagram(offCtx, 960, 540);
+                setZoomImgSrc(offscreen.toDataURL('image/png'));
                 setIsZoomOpen(true);
             };
 
@@ -1001,43 +1015,61 @@
                 showToast('勾配のすべての入力をクリアしました');
             };
 
-            const shareOrCopySlopeData = async () => {
+            // Googleドライブ保存 & スプレッドシート(CSV)出力
+            const exportToSpreadsheetOrDrive = async () => {
                 if (!slopeResult.hasResult) {
-                    showToast('コピーする計算結果がありません');
+                    showToast('保存する計算結果がありません');
                     return;
                 }
-                const lines = [
-                    '【勾配 寸法計算結果】',
-                    `基準側 L1: ${slopeResult.a} mm`,
-                    `延長側 L2: ${slopeResult.c} mm`,
-                    `全体の幅 W: ${slopeResult.b} mm`,
-                    `働き幅 ＠: ${slopeResult.interval} mm`,
-                    '------------------------',
-                    `延長後の幅: ${Math.round(slopeResult.newB).toLocaleString()} mm`,
-                    `延長後のL2: ${Math.round(slopeResult.newC).toLocaleString()} mm`,
-                    `総枚数: ${slopeResult.count}枚`,
-                    `増分: ${Math.round(Math.abs(slopeResult.step)).toLocaleString()} mm`,
-                    '------------------------',
-                    '【寸法詳細】'
+                const rows = [
+                    ['KYOWA ROOF 勾配寸法計算結果'],
+                    ['基準側 L1 (mm)', slopeResult.a],
+                    ['延長側 L2 (mm)', slopeResult.c],
+                    ['全体の幅 W (mm)', slopeResult.b],
+                    ['働き幅 ＠ (mm)', slopeResult.interval],
+                    ['延長後の幅 (mm)', Math.round(slopeResult.newB)],
+                    ['延長後のL2 (mm)', Math.round(slopeResult.newC)],
+                    ['総枚数 (枚)', slopeResult.count],
+                    ['増分/枚 (mm)', Math.round(Math.abs(slopeResult.step))],
+                    [],
+                    ['No.', '働き累計 (mm)', '屋根長さ (mm)']
                 ];
+
                 slopeResult.tableRows.forEach(r => {
-                    lines.push(`${r.no} | 働き幅: ${r.dist.toLocaleString()} | 長さ: ${r.height.toLocaleString()}`);
+                    rows.push([r.no, r.dist, r.height]);
                 });
-                lines.push(`端材 | 働き端材: ${Math.round(slopeResult.scrapW).toLocaleString()} | 長さ端材: ${Math.round(slopeResult.scrapL).toLocaleString()}`);
-                
-                const text = lines.join('\n');
-                try {
-                    await navigator.clipboard.writeText(text);
-                    showToast('計算結果をクリップボードにコピーしました');
-                } catch(e) {
-                    const el = document.createElement('textarea');
-                    el.value = text;
-                    document.body.appendChild(el);
-                    el.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(el);
-                    showToast('計算結果をクリップボードにコピーしました');
+
+                rows.push(['端材', `働き端材: ${Math.round(slopeResult.scrapW)}`, `長さ端材: ${Math.round(slopeResult.scrapL)}`]);
+
+                const csvContent = '\uFEFF' + rows.map(e => e.join(',')).join('\r\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const fileName = `勾配計算結果_${Math.round(slopeResult.b)}x${Math.round(slopeResult.interval)}.csv`;
+
+                if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'text/csv' })] })) {
+                    try {
+                        const file = new File([blob], fileName, { type: 'text/csv' });
+                        await navigator.share({
+                            files: [file],
+                            title: '勾配寸法計算結果',
+                            text: 'KYOWA ROOF 勾配寸法計算結果 (Googleドライブに保存可能)'
+                        });
+                        showToast('共有メニューを開きました（Googleドライブを選択できます）');
+                        return;
+                    } catch(e) {
+                        // ユーザーが共有をキャンセルした場合はフォールバック
+                    }
                 }
+
+                // フォールバック: 直接CSVダウンロード
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showToast('スプレッドシート用CSVを出力しました');
             };
 
             const handleSlopeKeypad = (key) => {
@@ -1055,7 +1087,7 @@
                     return;
                 }
                 if (key === '保存' || key === '角') {
-                    shareOrCopySlopeData();
+                    exportToSpreadsheetOrDrive();
                     return;
                 }
                 if (key === '⏎') {
@@ -1090,12 +1122,9 @@
             const handleCurrentKeypadRef = useRef();
             handleCurrentKeypadRef.current = handleCurrentKeypad;
 
-            // 物理キーボード対応（入力フォーム編集中はスキップするよう保護）
             useEffect(() => {
                 const handleKeyDown = (e) => {
-                    if (isTallyClearModalOpen || wConfirmClear || isZoomOpen) return;
-
-                    // input または textarea にフォーカスがある場合はテンキー操作と干渉させない
+                    if (isTallyClearModalOpen || wConfirmClear || isZoomOpen || isPitchZoomOpen || isKanamonoZoomOpen) return;
                     const activeTag = document.activeElement ? document.activeElement.tagName : '';
                     if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
 
@@ -1104,51 +1133,31 @@
                         handleCurrentKeypadRef.current?.(e.key);
                         return;
                     }
-
                     if (e.key === '.' || e.key === 'Decimal') {
                         e.preventDefault();
                         handleCurrentKeypadRef.current?.('.');
                         return;
                     }
-
                     if (e.key === 'Enter' || e.key === 'Tab') {
                         e.preventDefault();
                         handleCurrentKeypadRef.current?.('⏎');
                         return;
                     }
-
                     if (e.key === 'Backspace' || e.key === 'Delete') {
                         e.preventDefault();
                         handleCurrentKeypadRef.current?.('C');
                         return;
                     }
-
                     if (e.key === 'Escape') {
                         e.preventDefault();
                         handleCurrentKeypadRef.current?.('AC');
-                        return;
-                    }
-
-                    if (e.key === '+') {
-                        e.preventDefault();
-                        if (currentAppTab === 'waritsuke' || currentAppTab === 'trim') {
-                            handleCurrentKeypadRef.current?.('加算');
-                        } else {
-                            handleCurrentKeypadRef.current?.('+/-');
-                        }
-                        return;
-                    }
-
-                    if (e.key === '-') {
-                        e.preventDefault();
-                        handleCurrentKeypadRef.current?.('+/-');
                         return;
                     }
                 };
 
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [currentAppTab, isTallyClearModalOpen, wConfirmClear, isZoomOpen]);
+            }, [currentAppTab, isTallyClearModalOpen, wConfirmClear, isZoomOpen, isPitchZoomOpen]);
 
             return (
                 <div className="flex flex-col min-h-screen">
@@ -1673,7 +1682,7 @@
                             </div>
                         )}
 
-                        {/* 3. 金物割付 (始まり寸法タップ変更 & 均等引き機能追加) */}
+                        {/* 3. 金物割付 */}
                         {currentAppTab === 'kanamono' && (
                             <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-1.5 min-w-0 bg-[#18181b] p-2.5 rounded-xl border border-[#2c2c2e] shadow-lg">
@@ -1689,7 +1698,6 @@
                                         </div>
                                     </div>
 
-                                    {/* 働き (@) と 本数 (N) */}
                                     <div className="grid grid-cols-2 gap-1.5">
                                         <div
                                             onClick={() => { setKFocusedInputId('pitch'); setKIsOverwriteMode(true); }}
@@ -1724,7 +1732,6 @@
                                         </div>
                                     </div>
 
-                                    {/* 全幅 (W) と 始まり寸法 (チリ) */}
                                     <div className="grid grid-cols-3 gap-1.5">
                                         <div
                                             onClick={() => { setKFocusedInputId('totalLength'); setKIsOverwriteMode(true); }}
@@ -1755,7 +1762,6 @@
                                         </div>
                                     </div>
 
-                                    {/* テンキー */}
                                     <div className="pt-1 border-t border-[#2c2c2e]">
                                         <div className="grid grid-cols-4 gap-1.5 bg-[#121214] p-1.5 rounded-xl border border-[#2c2c2e]">
                                             <button type="button" onClick={() => handleCurrentKeypad('7')} className="h-11 rounded-lg text-xl keypad-btn kp-large-num">7</button>
@@ -1788,7 +1794,6 @@
                                         </div>
                                     </div>
 
-                                    {/* テンキー直下の計算結果カード */}
                                     <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-[#2c2c2e]">
                                         <div className={`p-2 rounded-xl border-2 transition-all ${kanamonoResult.mode === 'pitch-driven' ? 'border-[#0a84ff] bg-[#0a84ff]/10 shadow-md ring-1 ring-[#0a84ff]' : 'border-[#2c2c2e] bg-[#121214]'}`}>
                                             <div className="flex justify-between items-center mb-0.5 border-b border-[#2c2c2e] pb-0.5">
@@ -1832,12 +1837,16 @@
                                     </div>
                                 </div>
 
-                                {/* 右側：割付表 (墨出し寸法) */}
-                                <div className="flex flex-col min-w-0">
-                                    <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
-                                        <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
+                                <div className="flex flex-col min-w-0 flex-1">
+                                    <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col flex-1">
+                                        <div 
+                                            className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center transition-colors"
+                                        >
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <h3 className="text-[15px] font-bold text-white">割付表 (墨出し寸法)</h3>
+                                                <h3 className="text-[15px] font-bold text-white flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
+                                                    割付表
+                                                </h3>
                                                 <span className="text-[15px] font-bold text-white bg-[#121214] border border-[#3a3a3c] px-2.5 py-0.5 rounded font-mono">
                                                     全幅: <strong className="text-orange-400">{kanamonoResult.L ? kanamonoResult.L.toLocaleString() : '-'}</strong> ㎜
                                                 </span>
@@ -1846,26 +1855,32 @@
                                                         始まり: {kanamonoResult.S} ㎜
                                                     </span>
                                                 )}
+
                                             </div>
-                                            <span className="text-[15px] bg-orange-500 text-black px-2.5 py-1 rounded font-black tracking-wider shadow-sm">
-                                                墨出し寸法
-                                            </span>
+                                            <div className="flex items-center gap-2">
+
+                                                <span className="text-[15px] bg-orange-500 text-black px-2.5 py-1 rounded font-black tracking-wider shadow-sm">
+                                                    墨出し寸法
+                                                </span>
+                                            </div>
                                         </div>
 
-                                        <div className="overflow-y-auto max-h-[calc(100vh-140px)] custom-scrollbar">
+                                        <div 
+                                            className="overflow-y-auto flex-1 max-h-[calc(100vh-140px)] min-h-[380px] custom-scrollbar"
+                                        >
                                             <table className="w-full text-center border-collapse text-[15px]">
                                                 <thead className="sticky top-0 bg-[#242426] text-zinc-400 border-b border-[#2c2c2e] z-10 font-bold">
                                                     <tr>
                                                         <th className="py-2 px-2 w-16 border-r border-[#2c2c2e]">No.</th>
                                                         {kanamonoResult.showPitch && (
                                                             <th className={`py-2 px-3 text-[#0a84ff] ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e] w-1/2' : 'w-full'}`}>
-                                                                働き計算 (@{kanamonoResult.W ? kanamonoResult.W.toLocaleString() : '-'})
+                                                                働き計算
                                                                 {kanamonoResult.mode === 'pitch-driven' && <span className="text-orange-400 ml-0.5">★</span>}
                                                             </th>
                                                         )}
                                                         {kanamonoResult.showCount && (
                                                             <th className="py-2 px-3 text-[#30d158] w-1/2">
-                                                                本数計算 (N{kanamonoResult.N ? kanamonoResult.N.toLocaleString() : '-'})
+                                                                本数計算
                                                                 {kanamonoResult.mode === 'count-driven' && <span className="text-orange-400 ml-0.5">★</span>}
                                                             </th>
                                                         )}
@@ -1884,7 +1899,13 @@
                                                             return (
                                                                 <tr 
                                                                     key={r.no} 
-                                                                    onClick={r.isFirst ? () => { setKFocusedInputId('startOffset'); setKIsOverwriteMode(true); } : undefined}
+                                                                    onClick={(e) => {
+                                                                        if (r.isFirst) {
+                                                                            e.stopPropagation();
+                                                                            setKFocusedInputId('startOffset');
+                                                                            setKIsOverwriteMode(true);
+                                                                        }
+                                                                    }}
                                                                     className={`hover:bg-[#1a1a1e] transition-colors ${r.isFirst ? 'cursor-pointer' : ''}`}
                                                                 >
                                                                     <td className="py-2 px-2 border-r border-[#2c2c2e] font-bold text-zinc-400 font-mono">
@@ -1934,6 +1955,7 @@
                         {/* 4. 勾配 寸法計算 */}
                         {currentAppTab === 'slope' && (
                             <div className="grid grid-cols-2 gap-4 items-start">
+                                {/* 左側：設計寸法入力 + テンキー + 計算結果概要 */}
                                 <div className="flex flex-col gap-2 min-w-0 bg-[#1c1c1e] p-3 rounded-xl border border-[#2c2c2e] shadow-lg">
                                     <div className="flex items-center justify-between pb-1 border-b border-[#2c2c2e]">
                                         <h2 className="text-[15px] font-bold text-white flex items-center gap-1.5">
@@ -1991,6 +2013,7 @@
                                         </div>
                                     </div>
 
+                                    {/* テンキー */}
                                     <div className="mt-1 pt-1.5 border-t border-[#2c2c2e]">
                                         <div className="grid grid-cols-4 gap-1.5 bg-[#121214] p-1.5 rounded-xl border border-[#2c2c2e]">
                                             <button type="button" onClick={() => handleCurrentKeypad('7')} className="h-12 rounded-lg text-xl keypad-btn kp-large-num">7</button>
@@ -2014,89 +2037,39 @@
                                         </div>
                                     </div>
 
-                                    <div className="rounded-lg border border-[#2c2c2e] overflow-hidden flex flex-col mt-1">
-                                        <div className="bg-[#242426] px-2 py-0.5 flex justify-between items-center border-b border-[#2c2c2e]">
-                                            <span className="text-[15px] font-bold text-white">ピッチ別 屋根長さ詳細</span>
-                                            <span className="text-[15px] text-zinc-400">単位: mm</span>
-                                        </div>
-                                        <div className="overflow-y-auto max-h-[140px] custom-scrollbar">
-                                            <table className="result-table w-full border-collapse bg-[#121214] text-[15px]">
-                                                <thead className="sticky top-0 bg-[#1c1c1e] z-10 text-zinc-400">
-                                                    <tr>
-                                                        <th className="w-10 text-[#ff9f0a] py-0.5 font-bold">No.</th>
-                                                        <th className="text-[#0a84ff] py-0.5 font-bold">働き累計</th>
-                                                        <th className="text-[#30d158] py-0.5 font-bold">屋根長さ</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {!slopeResult.hasResult ? (
-                                                        <tr>
-                                                            <td colSpan="3" className="text-center py-4 text-zinc-500">数値を入力すると寸法表が表示されます</td>
-                                                        </tr>
-                                                    ) : (
-                                                        <>
-                                                            {slopeResult.tableRows.map(r => (
-                                                                <tr key={r.no} className="hover:bg-[#1f1f22]">
-                                                                    <td className="text-center font-bold text-[#ff9f0a] py-0.5">{r.no}</td>
-                                                                    <td className={`text-center font-semibold py-0.5 ${r.isStart ? "text-[#8e8e93]" : "text-[#0a84ff]"}`}>
-                                                                        {r.dist.toLocaleString()}
-                                                                    </td>
-                                                                    <td className={`text-center font-bold text-[15px] ${r.isStart ? "text-[#8e8e93]" : "text-[#30d158]"} py-0.5`}>
-                                                                        {r.height.toLocaleString()}
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                            <tr className="bg-[#242426]">
-                                                                <td className="text-center font-bold text-[#aeaeb2] py-0.5 text-[15px]">端材</td>
-                                                                <td className="text-center text-[#0a84ff] py-0.5">
-                                                                    <span className="text-[15px] text-zinc-400 block">働き端材:</span>
-                                                                    <span className="font-bold">{Math.round(slopeResult.scrapW).toLocaleString()}</span>
-                                                                </td>
-                                                                <td className="text-center text-[#30d158] py-0.5">
-                                                                    <span className="text-[15px] text-zinc-400 block">長さ端材:</span>
-                                                                    <span className="font-bold text-[15px]">{Math.round(slopeResult.scrapL).toLocaleString()}</span>
-                                                                </td>
-                                                            </tr>
-                                                        </>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-2.5 min-w-0">
-                                    <div className="bg-[#1c1c1e] p-3 rounded-xl border border-[#2c2c2e] shadow-md flex flex-col gap-2">
+                                    {/* テンキーの直下に移動した「計算結果 概要」 */}
+                                    <div className="bg-[#121214] p-2.5 rounded-xl border border-[#2c2c2e] shadow-md flex flex-col gap-2 mt-1">
                                         <div className="flex items-center justify-between pb-1 border-b border-[#2c2c2e]">
                                             <span className="text-[15px] font-bold text-white">計算結果 概要</span>
                                             <button
                                                 type="button"
-                                                onClick={shareOrCopySlopeData}
-                                                className="px-2.5 py-0.5 bg-[#0a84ff] hover:bg-[#0071e3] text-white text-[15px] font-bold rounded flex items-center gap-1 shadow-sm"
+                                                onClick={exportToSpreadsheetOrDrive}
+                                                className="px-2.5 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[15px] font-bold rounded flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+                                                title="Googleドライブまたはスプレッドシートへ保存"
                                             >
-                                                <Icon name="copy" size={13} /> 結果をコピー
+                                                <Icon name="cloud" size={15} /> ドライブ保存 / 出力
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-4 gap-1.5 text-center">
-                                            <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
+                                            <div className="bg-[#1c1c1e] p-1.5 rounded-lg border border-[#2c2c2e]">
                                                 <span className="block text-[15px] font-bold text-[#0a84ff]">延長後 幅</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(slopeResult.newB).toLocaleString() : '-'}
                                                 </span>
                                             </div>
-                                            <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
+                                            <div className="bg-[#1c1c1e] p-1.5 rounded-lg border border-[#2c2c2e]">
                                                 <span className="block text-[15px] font-bold text-[#30d158]">延長後 L2</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(slopeResult.newC).toLocaleString() : '-'}
                                                 </span>
                                             </div>
-                                            <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
+                                            <div className="bg-[#1c1c1e] p-1.5 rounded-lg border border-[#2c2c2e]">
                                                 <span className="block text-[15px] font-bold text-[#ff9f0a]">総枚数</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? `${slopeResult.count}枚` : '-'}
                                                 </span>
                                             </div>
-                                            <div className="bg-[#121214] p-1.5 rounded-lg border border-[#2c2c2e]">
+                                            <div className="bg-[#1c1c1e] p-1.5 rounded-lg border border-[#2c2c2e]">
                                                 <span className="block text-[15px] font-bold text-[#bf5af2]">増分/枚</span>
                                                 <span className="text-lg font-black text-white font-mono">
                                                     {slopeResult.hasResult ? Math.round(Math.abs(slopeResult.step)).toLocaleString() : '-'}
@@ -2104,22 +2077,124 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="bg-[#1c1c1e] border border-[#2c2c2e] rounded-xl p-3 shadow-lg flex flex-col h-full min-h-[440px]">
+                                {/* 右側：断面形状図（上部） + ピッチ別 屋根長さ詳細（下部・画面高さ連動スクロール） */}
+                                <div className="flex flex-col gap-2.5 min-w-0">
+                                    {/* 勾配 断面形状図 */}
+                                    <div className="bg-[#1c1c1e] border border-[#2c2c2e] rounded-xl p-3 shadow-lg flex flex-col transition-all">
                                         <div className="flex items-center justify-between mb-2">
-                                            <h3 className="text-[15px] font-semibold text-[#8e8e93] uppercase tracking-wide">勾配 断面形状図</h3>
-                                            <span className="text-[15px] text-[#8e8e93]">クリックで拡大プレビュー</span>
+                                            <div
+                                                onClick={openZoom}
+                                                className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                                                title="タップして拡大プレビュー表示（非表示時でも閲覧可能）"
+                                            >
+                                                <h3 className="text-[15px] font-bold text-white tracking-wide">勾配 断面形状図</h3>
+                                                <span className="text-xs text-[#0a84ff] bg-[#0a84ff]/15 px-2 py-0.5 rounded-full font-bold border border-[#0a84ff]/30 flex items-center gap-1">
+                                                    <Icon name="zoom" size={12} /> 拡大
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsDiagramVisible(!isDiagramVisible)}
+                                                className="px-2.5 py-1 bg-[#2c2c2e] hover:bg-[#3a3a3c] text-zinc-300 hover:text-white text-[15px] font-bold rounded flex items-center gap-1.5 border border-[#3e3e42] transition-colors"
+                                            >
+                                                <Icon name={isDiagramVisible ? "eyeOff" : "eye"} size={14} />
+                                                <span>{isDiagramVisible ? "図を非表示" : "図を表示する"}</span>
+                                            </button>
                                         </div>
+
+                                        {isDiagramVisible && (
+                                            <div
+                                                className="w-full h-[220px] bg-[#121214] border border-[#2c2c2e] rounded-lg overflow-hidden cursor-pointer relative flex items-center justify-center transition-all"
+                                                onClick={openZoom}
+                                            >
+                                                <canvas ref={slopeCanvasRef} className="w-full h-full block"></canvas>
+                                                {!slopeResult.hasResult && (
+                                                    <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-[15px] font-bold">
+                                                        寸法を入力すると断面図が描画されます
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* ピッチ別 屋根長さ詳細（画面に合わせて高さが連動し、タップで拡大プレビュー） */}
+                                    <div className="bg-[#1c1c1e] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col flex-1 min-h-[220px]">
                                         <div
-                                            className="w-full flex-1 bg-[#121214] border border-[#2c2c2e] rounded-lg overflow-hidden cursor-pointer relative min-h-[400px] flex items-center justify-center"
-                                            onClick={openZoom}
+                                            onClick={() => slopeResult.hasResult && setIsPitchZoomOpen(true)}
+                                            className="bg-[#242426] px-3 py-2 flex justify-between items-center border-b border-[#2c2c2e] cursor-pointer hover:bg-[#2a2a2e] transition-colors"
+                                            title="タップして全画面拡大プレビューを表示"
                                         >
-                                            <canvas ref={slopeCanvasRef} className="w-full h-full block"></canvas>
-                                            {!slopeResult.hasResult && (
-                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-[15px] font-bold">
-                                                    寸法を入力すると断面図が描画されます
-                                                </div>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[15px] font-bold text-white flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-3 bg-blue-500 rounded-sm"></span>
+                                                    ピッチ別 屋根長さ詳細
+                                                </span>
+                                                {slopeResult.hasResult && (
+                                                    <span className="text-xs font-bold text-zinc-400 bg-[#121214] px-2 py-0.5 rounded border border-[#3a3a3c]">
+                                                        全 {slopeResult.tableRows.length} 枚
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-zinc-400">単位: mm</span>
+                                                {slopeResult.hasResult && (
+                                                    <span className="text-xs text-[#0a84ff] bg-[#0a84ff]/15 px-2 py-0.5 rounded-full font-bold border border-[#0a84ff]/30 flex items-center gap-1">
+                                                        <Icon name="zoom" size={12} /> 拡大表示
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* 画面高さに合わせて最大行数を表示するスクロールコンテナ */}
+                                        <div
+                                            onClick={() => slopeResult.hasResult && setIsPitchZoomOpen(true)}
+                                            className={`overflow-y-auto flex-1 custom-scrollbar ${isDiagramVisible ? 'max-h-[calc(100vh-480px)] min-h-[200px]' : 'max-h-[calc(100vh-220px)] min-h-[400px]'} cursor-pointer`}
+                                        >
+                                            <table className="result-table w-full border-collapse bg-[#121214] text-[15px]">
+                                                <thead className="sticky top-0 bg-[#1c1c1e] z-10 text-zinc-400">
+                                                    <tr>
+                                                        <th className="w-14 text-[#ff9f0a] py-1.5 font-bold">No.</th>
+                                                        <th className="text-[#0a84ff] py-1.5 font-bold">働き累計</th>
+                                                        <th className="text-[#30d158] py-1.5 font-bold">屋根長さ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {!slopeResult.hasResult ? (
+                                                        <tr>
+                                                            <td colSpan="3" className="text-center py-12 text-zinc-500">
+                                                                数値を入力すると寸法表が表示されます
+                                                            </td>
+                                                        </tr>
+                                                    ) : (
+                                                        <>
+                                                            {slopeResult.tableRows.map(r => (
+                                                                <tr key={r.no} className="hover:bg-[#1f1f22] transition-colors">
+                                                                    <td className="text-center font-bold text-[#ff9f0a] py-1">{r.no}</td>
+                                                                    <td className={`text-center font-semibold py-1 font-mono ${r.isStart ? "text-[#8e8e93]" : "text-[#0a84ff]"}`}>
+                                                                        {r.dist.toLocaleString()}
+                                                                    </td>
+                                                                    <td className={`text-center font-bold text-[15px] py-1 font-mono ${r.isStart ? "text-[#8e8e93]" : "text-[#30d158]"}`}>
+                                                                        {r.height.toLocaleString()}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                            <tr className="bg-[#242426]">
+                                                                <td className="text-center font-bold text-[#aeaeb2] py-1.5 text-[15px]">端材</td>
+                                                                <td className="text-center text-[#0a84ff] py-1.5 font-mono">
+                                                                    <span className="text-xs text-zinc-400 block">働き端材</span>
+                                                                    <span className="font-bold">{Math.round(slopeResult.scrapW).toLocaleString()}</span>
+                                                                </td>
+                                                                <td className="text-center text-[#30d158] py-1.5 font-mono">
+                                                                    <span className="text-xs text-zinc-400 block">長さ端材</span>
+                                                                    <span className="font-bold text-[15px]">{Math.round(slopeResult.scrapL).toLocaleString()}</span>
+                                                                </td>
+                                                            </tr>
+                                                        </>
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -2134,17 +2209,228 @@
                         </div>
                     )}
 
+                    {/* 断面図 拡大モーダル */}
                     {isZoomOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-6" onClick={() => setIsZoomOpen(false)}>
                             <div className="relative max-w-5xl w-full max-h-[90vh] bg-[#1c1c1e] border border-[#3a3a3c] rounded-2xl p-4 flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-base font-semibold text-white">勾配 断面図 拡大表示</span>
+                                    <span className="text-base font-semibold text-white">勾配 断面形状図 拡大プレビュー</span>
                                     <button type="button" onClick={() => setIsZoomOpen(false)} className="text-[#8e8e93] hover:text-white p-1 rounded-lg">
                                         <Icon name="close" size={20} />
                                     </button>
                                 </div>
-                                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                                <div className="flex-1 flex items-center justify-center overflow-hidden bg-[#121214] rounded-xl p-2 border border-[#2c2c2e]">
                                     <img src={zoomImgSrc} className="max-w-full max-h-[75vh] object-contain" alt="拡大プレビュー" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ピッチ別寸法 拡大一覧モーダル（スクロールなし・マルチカラム全件一括表示） */}
+                    {isPitchZoomOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 md:p-6" onClick={() => setIsPitchZoomOpen(false)}>
+                            <div className="relative max-w-6xl w-full max-h-[96vh] bg-[#1c1c1e] border border-[#3a3a3c] rounded-2xl flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+                                <div className="px-5 py-3 bg-[#242426] border-b border-[#3a3a3c] flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                                            <span className="w-2 h-3 bg-blue-500 rounded-sm"></span>
+                                            ピッチ別 屋根長さ詳細 全体一覧
+                                        </h3>
+                                        <span className="text-xs md:text-sm font-mono text-zinc-400 bg-[#121214] px-2.5 py-0.5 rounded border border-[#3a3a3c]">
+                                            全 {slopeResult.tableRows.length} 枚 (全件表示)
+                                        </span>
+                                    </div>
+                                    <button type="button" onClick={() => setIsPitchZoomOpen(false)} className="text-zinc-400 hover:text-white p-1 rounded-lg">
+                                        <Icon name="close" size={22} />
+                                    </button>
+                                </div>
+
+                                <div className="px-4 py-2 bg-[#121214] border-b border-[#2c2c2e] grid grid-cols-4 gap-2 text-center font-mono">
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#0a84ff] block">全体幅 W</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{Math.round(slopeResult.b).toLocaleString()} mm</span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#bf5af2] block">働き ＠</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{Math.round(slopeResult.interval).toLocaleString()} mm</span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#30d158] block">総枚数</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{slopeResult.count} 枚</span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#ff9f0a] block">増分 / 枚</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{Math.round(Math.abs(slopeResult.step)).toLocaleString()} mm</span>
+                                    </div>
+                                </div>
+
+                                <div className="p-3 flex-1 flex flex-col justify-center overflow-hidden">
+                                    {(() => {
+                                        const rows = slopeResult.tableRows;
+                                        const totalCount = rows.length + 1; // +1は端材行
+                                        let cols = 1;
+                                        if (totalCount > 36) cols = 4;
+                                        else if (totalCount > 22) cols = 3;
+                                        else if (totalCount > 10) cols = 2;
+
+                                        const perCol = Math.ceil(totalCount / cols);
+                                        const colData = [];
+                                        for (let c = 0; c < cols; c++) {
+                                            colData.push(rows.slice(c * perCol, (c + 1) * perCol));
+                                        }
+
+                                        return (
+                                            <div
+                                                className="grid gap-2.5 w-full items-start"
+                                                style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+                                            >
+                                                {colData.map((cRows, cIdx) => (
+                                                    <div key={cIdx} className="bg-[#121214] border border-[#2c2c2e] rounded-xl overflow-hidden shadow">
+                                                        <table className="result-table w-full border-collapse font-mono text-sm">
+                                                            <thead className="bg-[#242426] text-zinc-300 border-b border-[#2c2c2e]">
+                                                                <tr>
+                                                                    <th className="w-11 py-1 text-[#ff9f0a] font-bold text-xs">No.</th>
+                                                                    <th className="py-1 text-[#0a84ff] font-bold text-xs">働き累計</th>
+                                                                    <th className="py-1 text-[#30d158] font-bold text-xs">屋根長さ</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-[#2c2c2e]">
+                                                                {cRows.map(r => (
+                                                                    <tr key={r.no} className="hover:bg-[#1c1c20]">
+                                                                        <td className="text-center font-bold text-[#ff9f0a] py-1 text-xs">{r.no}</td>
+                                                                        <td className={`text-center font-semibold py-1 text-xs ${r.isStart ? "text-zinc-500" : "text-[#0a84ff]"}`}>
+                                                                            {r.dist.toLocaleString()}
+                                                                        </td>
+                                                                        <td className={`text-center font-bold py-1 text-sm ${r.isStart ? "text-zinc-500" : "text-[#30d158]"}`}>
+                                                                            {r.height.toLocaleString()}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                                {cIdx === cols - 1 && (
+                                                                    <tr className="bg-[#242426] font-bold">
+                                                                        <td className="text-center text-zinc-400 py-1 text-xs">端材</td>
+                                                                        <td className="text-center text-[#0a84ff] py-1 text-xs">
+                                                                            {Math.round(slopeResult.scrapW).toLocaleString()}
+                                                                        </td>
+                                                                        <td className="text-center text-[#30d158] py-1 text-sm">
+                                                                            {Math.round(slopeResult.scrapL).toLocaleString()}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 金物割付 墨出し寸法 拡大一覧モーダル（スクロールなし・マルチカラム全件一括表示） */}
+                    {isKanamonoZoomOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 md:p-6" onClick={() => setIsKanamonoZoomOpen(false)}>
+                            <div className="relative max-w-6xl w-full max-h-[96vh] bg-[#1c1c1e] border border-[#3a3a3c] rounded-2xl flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+                                <div className="px-5 py-3 bg-[#242426] border-b border-[#3a3a3c] flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                                            <span className="w-2 h-3 bg-orange-500 rounded-sm"></span>
+                                            金物割付 墨出し寸法 全体一覧
+                                        </h3>
+                                        <span className="text-xs md:text-sm font-mono text-zinc-400 bg-[#121214] px-2.5 py-0.5 rounded border border-[#3a3a3c]">
+                                            全 {kanamonoResult.rows.length} 箇所 (全件表示)
+                                        </span>
+                                    </div>
+                                    <button type="button" onClick={() => setIsKanamonoZoomOpen(false)} className="text-zinc-400 hover:text-white p-1 rounded-lg">
+                                        <Icon name="close" size={22} />
+                                    </button>
+                                </div>
+
+                                <div className="px-4 py-2 bg-[#121214] border-b border-[#2c2c2e] grid grid-cols-4 gap-2 text-center font-mono">
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-zinc-400 block">全幅 (W)</span>
+                                        <span className="text-sm md:text-base font-bold text-orange-400">{kanamonoResult.L ? kanamonoResult.L.toLocaleString() : '-'} mm</span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-amber-300 block">始まり (S)</span>
+                                        <span className="text-sm md:text-base font-bold text-amber-300">{kanamonoResult.S} mm</span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#0a84ff] block">働き計算 (本数/残)</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{kanamonoResult.resQty} 本 <span className="text-xs text-zinc-400">({kanamonoResult.resQtyRem}㎜)</span></span>
+                                    </div>
+                                    <div className="p-1.5 bg-[#1c1c1e] rounded-lg border border-[#2c2c2e]">
+                                        <span className="text-[11px] text-[#30d158] block">本数計算 (働き/残)</span>
+                                        <span className="text-sm md:text-base font-bold text-white">{kanamonoResult.resWidth} ㎜ <span className="text-xs text-zinc-400">({kanamonoResult.resWidthRem}㎜)</span></span>
+                                    </div>
+                                </div>
+
+                                <div className="p-3 flex-1 flex flex-col justify-center overflow-hidden">
+                                    {(() => {
+                                        const rows = kanamonoResult.rows;
+                                        const totalCount = rows.length;
+                                        let cols = 1;
+                                        if (totalCount > 36) cols = 4;
+                                        else if (totalCount > 22) cols = 3;
+                                        else if (totalCount > 10) cols = 2;
+
+                                        const perCol = Math.ceil(totalCount / cols);
+                                        const colData = [];
+                                        for (let c = 0; c < cols; c++) {
+                                            colData.push(rows.slice(c * perCol, (c + 1) * perCol));
+                                        }
+
+                                        return (
+                                            <div
+                                                className="grid gap-2.5 w-full items-start"
+                                                style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+                                            >
+                                                {colData.map((cRows, cIdx) => (
+                                                    <div key={cIdx} className="bg-[#121214] border border-[#2c2c2e] rounded-xl overflow-hidden shadow">
+                                                        <table className="result-table w-full border-collapse font-mono text-sm text-center">
+                                                            <thead className="bg-[#242426] text-zinc-300 border-b border-[#2c2c2e]">
+                                                                <tr>
+                                                                    <th className="w-12 py-1 text-zinc-400 font-bold text-xs border-r border-[#2c2c2e]">No.</th>
+                                                                    {kanamonoResult.showPitch && (
+                                                                        <th className={`py-1 text-[#0a84ff] font-bold text-xs ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e]' : ''}`}>
+                                                                            働き
+                                                                        </th>
+                                                                    )}
+                                                                    {kanamonoResult.showCount && (
+                                                                        <th className="py-1 text-[#30d158] font-bold text-xs">
+                                                                            本数
+                                                                        </th>
+                                                                    )}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-[#2c2c2e]">
+                                                                {cRows.map(r => {
+                                                                    const isModified = kanamonoResult.S > 0 && (r.isFirst || r.isLast);
+                                                                    return (
+                                                                        <tr key={r.no} className="hover:bg-[#1c1c20]">
+                                                                            <td className="py-1 text-xs text-zinc-400 font-bold border-r border-[#2c2c2e]">{r.no}</td>
+                                                                            {kanamonoResult.showPitch && (
+                                                                                <td className={`py-1 text-sm font-bold ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e]' : ''} ${isModified ? 'text-amber-300' : 'text-[#0a84ff]'}`}>
+                                                                                    {r.pitchVal}
+                                                                                </td>
+                                                                            )}
+                                                                            {kanamonoResult.showCount && (
+                                                                                <td className={`py-1 text-sm font-bold ${isModified ? 'text-amber-300' : 'text-[#30d158]'}`}>
+                                                                                    {r.countVal}
+                                                                                </td>
+                                                                            )}
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>
@@ -2157,7 +2443,7 @@
                                 <p className="text-base text-zinc-400">すべての割付計算履歴を削除します。よろしいですか？</p>
                                 <div className="flex gap-3 pt-2">
                                     <button onClick={() => setWConfirmClear(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setWHistory([]); localStorage.removeItem('waritsuke_history_v14'); setWConfirmClear(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
+                                    <button onClick={() => { setWHistory([]); try { localStorage.removeItem('waritsuke_history_v14'); } catch(e) {} setWConfirmClear(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
                                 </div>
                             </div>
                         </div>
@@ -2170,7 +2456,7 @@
                                 <p className="text-base text-zinc-400">品名別の集計データをすべて削除します。よろしいですか？</p>
                                 <div className="flex gap-3 pt-2">
                                     <button onClick={() => setIsTallyClearModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setSavedTallies([]); localStorage.removeItem('trim_calc_tallies_v15'); setIsTallyClearModalOpen(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
+                                    <button onClick={() => { setSavedTallies([]); try { localStorage.removeItem('trim_calc_tallies_v15'); } catch(e) {} setIsTallyClearModalOpen(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
                                 </div>
                             </div>
                         </div>
@@ -2181,16 +2467,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('ServiceWorker registered:', reg.scope))
-                    .catch(err => console.error('ServiceWorker registration failed:', err));
-            });
-        }
     </script>
 </body>
 </html>

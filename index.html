@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KYOWA ROOF - 統合寸法計算</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- PWA設定 -->
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
     <link rel="apple-touch-icon" href="./icon-180.png">
+    <link rel="icon" href="./icon-192.png" type="image/png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121214">
+
+    <!-- ライブラリの読み込み順を調整し、フォールバックを追加 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
         body {
             font-size: 15px;
@@ -62,7 +67,7 @@
             transform: translateY(1px);
         }
 
-        /* テンキー専用スタイル (大テンキー 4x4) */
+        /* テンキー専用スタイル */
         .keypad-btn {
             touch-action: manipulation;
             user-select: none;
@@ -101,15 +106,29 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+    <!-- エラー表示用のフォールバックUI -->
+    <noscript>
+        <div style="color: white; padding: 20px; text-align: center;">
+            JavaScriptを有効にしてください。
+        </div>
+    </noscript>
+    <div id="loading" style="color: white; padding: 20px; text-align: center; margin-top: 50px;">
+        読み込み中... しばらくお待ちください。<br>
+        <span style="font-size: 12px; color: #888;">(数秒経っても表示されない場合は再読み込みしてください)</span>
+    </div>
+    
     <div id="root"></div>
 
     <script type="text/babel">
+        // 読み込み完了時にローディングを隠す
+        document.getElementById('loading').style.display = 'none';
+
         const { useState, useEffect, useRef, useMemo } = React;
 
         const Icon = ({ name, size = 16, className = "" }) => {
             const paths = {
                 save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
-                trash: <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
+                trash: <path d="M3 6h18M19 6v14a2 2 0 0 1-2-2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
                 chevron: <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
                 plus: <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />,
                 copy: <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />,
@@ -409,7 +428,6 @@
                 return { pieces: 0, remainder: 0 };
             }, [totalDim, stdLength, overlap]);
 
-            // 保存キーで直接「品名別 集計」に保存・集計
             const saveTrimDirectToTally = () => {
                 if (materialResult.pieces === 0 || stdLength === '') {
                     showToast('保存する計算結果がありません');
@@ -457,7 +475,6 @@
                 setSavedTallies(updatedTallies);
                 localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updatedTallies));
                 
-                // 全長の値は保持し、加算入力欄のみクリア（次回テンキー押下時は新規上書き可能）
                 setAddInput('');
                 setTrimIsNewEntry(true);
                 setTrimActiveField('totalDim');
@@ -619,10 +636,8 @@
                 let listWidth = [];
 
                 if (!isNaN(L) && L > 0) {
-                    // 両端の始まり寸法Sを考慮した内々有効寸法
                     const effL = Math.max(0, L - (2 * S));
 
-                    // 1. 働き計算 (@基準)
                     if (!isNaN(W) && W > 0) {
                         if (effL > 0) {
                             const qty = Math.floor(effL / W) + 1;
@@ -630,7 +645,6 @@
                             resQty = qty.toLocaleString();
                             resQtyRem = Math.round(rem).toLocaleString();
 
-                            // 端振り：始まりSに余りの半分を加算して割り付け
                             let pos = S + (rem / 2);
                             for (let i = 0; i < qty; i++) {
                                 listQty.push(Math.round(pos));
@@ -643,7 +657,6 @@
                         }
                     }
 
-                    // 2. 本数計算 (N基準: ユーザー要望の 100, 1250, 2400)
                     if (!isNaN(N) && N > 1) {
                         if (effL >= 0) {
                             const pitchVal = (N > 1) ? Math.floor(effL / (N - 1)) : 0;
@@ -657,7 +670,6 @@
                                 } else if (i === N - 1) {
                                     listWidth.push(Math.round(L - S));
                                 } else {
-                                    // S から (L - 2S) の区間を等分配置 (丸め誤差防止)
                                     const pos = S + Math.round((effL * i) / (N - 1));
                                     listWidth.push(pos);
                                 }
@@ -980,7 +992,6 @@
 
             useEffect(() => {
                 if (currentAppTab === 'slope') {
-                    // タブ切り替え直後のレイアウト計算遅延を考慮し、requestAnimationFrameで確実に描画
                     const rafId = requestAnimationFrame(() => {
                         drawSlopeCanvas();
                     });
@@ -1033,7 +1044,8 @@
                 });
                 lines.push(`端材 | 働き端材: ${Math.round(slopeResult.scrapW).toLocaleString()} | 長さ端材: ${Math.round(slopeResult.scrapL).toLocaleString()}`);
                 
-                const text = lines.join('\n');
+                const text = lines.join('
+');
                 try {
                     await navigator.clipboard.writeText(text);
                     showToast('計算結果をクリップボードにコピーしました');
@@ -1098,12 +1110,10 @@
             const handleCurrentKeypadRef = useRef();
             handleCurrentKeypadRef.current = handleCurrentKeypad;
 
-            // 物理キーボード対応（入力フォーム編集中はスキップするよう保護）
             useEffect(() => {
                 const handleKeyDown = (e) => {
                     if (isTallyClearModalOpen || wConfirmClear || isZoomOpen) return;
 
-                    // input または textarea にフォーカスがある場合はテンキー操作と干渉させない
                     const activeTag = document.activeElement ? document.activeElement.tagName : '';
                     if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
 

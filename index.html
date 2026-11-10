@@ -46,14 +46,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #48484a;
         }
-        .btn-mac-primary {
-            background: linear-gradient(180deg, #ff9500 0%, #e67600 100%);
-            border: 1px solid #b35c00;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
-        }
-        .btn-mac-primary:active {
-            transform: translateY(1px);
-        }
         .btn-mac-silver {
             background: linear-gradient(180deg, #3a3a3e 0%, #2a2a2d 100%);
             border: 1px solid #4a4a50;
@@ -2189,6 +2181,16 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('ServiceWorker registered:', reg.scope))
+                    .catch(err => console.error('ServiceWorker registration failed:', err));
+            });
+        }
     </script>
 </body>
 </html>

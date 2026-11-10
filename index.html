@@ -15,9 +15,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121214">
     <style>
-        * {
-            min-font-size: 15px;
-        }
         body {
             font-size: 15px;
             background-color: #121214;
@@ -139,18 +136,18 @@
         const toNum = (val) => parseFloat(unformat(val)) || 0;
 
         function App() {
-            const [currentAppTab, setCurrentAppTab] = useState('waritsuke');
+            const [currentAppTab, setCurrentAppTab] = useState('kanamono');
             const [toastMessage, setToastMessage] = useState(null);
 
             const showToast = (msg) => {
                 setToastMessage(msg);
-                setTimeout(() => setToastMessage(null), 2200);
+                setTimeout(() => setToastMessage(null), 2400);
             };
 
             // ==========================================
             // 1. 材料取り割付
             // ==========================================
-            const [wInputNo, setWInputNo] = useState('');
+            const [wInputNo, setWInputNo] = useState('No.1');
             const [wMemoDim, setWMemoDim] = useState('');
             const [wTotalLength, setWTotalLength] = useState('');
             const [wPitch, setWPitch] = useState('');
@@ -279,7 +276,7 @@
 
             const handleWKeypad = (key) => {
                 if (key === 'AC') {
-                    setWInputNo(''); setWMemoDim(''); setWTotalLength(''); setWPitch(''); setWCount(''); setWAddLength('');
+                    setWInputNo('No.1'); setWMemoDim(''); setWTotalLength(''); setWPitch(''); setWCount(''); setWAddLength('');
                     setWInputSource(null);
                     setWIsNewEntry(true);
                     setWActiveField('totalLength');
@@ -364,23 +361,16 @@
             // ==========================================
             // 2. 役物材料 計算
             // ==========================================
-            const [currentProductName, setCurrentProductName] = useState('');
+            const [currentProductName, setCurrentProductName] = useState('No.1');
             const [stdLength, setStdLength] = useState(() => localStorage.getItem('trim_calc_stdLength_v15') || '3000');
             const [overlap, setOverlap] = useState(() => localStorage.getItem('trim_calc_overlap_v15') || '50');
             const [totalDim, setTotalDim] = useState('');
             const [addInput, setAddInput] = useState('');
             const [expandedTallyId, setExpandedTallyId] = useState(null);
-            const [isClearModalOpen, setIsClearModalOpen] = useState(false);
             const [isTallyClearModalOpen, setIsTallyClearModalOpen] = useState(false);
             const [trimActiveField, setTrimActiveField] = useState('totalDim');
             const [trimIsNewEntry, setTrimIsNewEntry] = useState(true);
 
-            const [history, setHistory] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('trim_calc_history_v15');
-                    return saved ? JSON.parse(saved) : [];
-                } catch(e) { return []; }
-            });
             const [savedTallies, setSavedTallies] = useState(() => {
                 try {
                     const saved = localStorage.getItem('trim_calc_tallies_v15');
@@ -419,11 +409,16 @@
                 return { pieces: 0, remainder: 0 };
             }, [totalDim, stdLength, overlap]);
 
-            const saveTrimToHistory = () => {
-                if (materialResult.pieces === 0 || stdLength === '') return;
-                const newItem = {
-                    id: Date.now().toString(),
-                    name: currentProductName || '名称未設定',
+            // 保存キーで直接「品名別 集計」に保存・集計
+            const saveTrimDirectToTally = () => {
+                if (materialResult.pieces === 0 || stdLength === '') {
+                    showToast('保存する計算結果がありません');
+                    return;
+                }
+                const name = (currentProductName || '').trim() || 'No.1';
+                const detailItem = {
+                    id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+                    name: name,
                     total: totalDim,
                     std: stdLength,
                     overlap: overlap,
@@ -431,62 +426,54 @@
                     remainder: materialResult.remainder,
                     createdAt: Date.now()
                 };
-                const newHistory = [newItem, ...history].slice(0, 50);
-                setHistory(newHistory);
-                localStorage.setItem('trim_calc_history_v15', JSON.stringify(newHistory));
-                showToast('役物計算結果を保存しました');
-            };
 
-            const deleteHistoryItem = (id) => {
-                const newHistory = history.filter(item => item.id !== id);
-                setHistory(newHistory);
-                localStorage.setItem('trim_calc_history_v15', JSON.stringify(newHistory));
-            };
-
-            const saveHistoryTotal = () => {
-                if (history.length === 0) return;
                 let updatedTallies = [...savedTallies];
+                const existingIdx = updatedTallies.findIndex(t => t.name === name);
 
-                history.forEach(item => {
-                    const name = item.name || '名称未設定';
-                    const existingTallyIdx = updatedTallies.findIndex(t => t.name === name);
+                if (existingIdx > -1) {
+                    updatedTallies[existingIdx] = {
+                        ...updatedTallies[existingIdx],
+                        std: updatedTallies[existingIdx].std || detailItem.std,
+                        pieces: updatedTallies[existingIdx].pieces + (detailItem.pieces || 0),
+                        totalDistance: updatedTallies[existingIdx].totalDistance + toNum(detailItem.total),
+                        totalRemainder: updatedTallies[existingIdx].totalRemainder + (toNum(detailItem.remainder) || 0),
+                        details: [detailItem, ...(updatedTallies[existingIdx].details || [])],
+                        updatedAt: Date.now()
+                    };
+                } else {
+                    updatedTallies.unshift({
+                        id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
+                        name: name,
+                        std: detailItem.std,
+                        pieces: detailItem.pieces || 0,
+                        totalDistance: toNum(detailItem.total),
+                        totalRemainder: toNum(detailItem.remainder) || 0,
+                        details: [detailItem],
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    });
+                }
 
-                    if (existingTallyIdx > -1) {
-                        updatedTallies[existingTallyIdx] = {
-                            ...updatedTallies[existingTallyIdx],
-                            std: updatedTallies[existingTallyIdx].std || item.std,
-                            pieces: updatedTallies[existingTallyIdx].pieces + (item.pieces || 0),
-                            totalDistance: updatedTallies[existingTallyIdx].totalDistance + toNum(item.total),
-                            totalRemainder: updatedTallies[existingTallyIdx].totalRemainder + (toNum(item.remainder) || 0),
-                            details: [item, ...(updatedTallies[existingTallyIdx].details || [])],
-                            createdAt: Date.now()
-                        };
-                    } else {
-                        updatedTallies.unshift({
-                            id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
-                            name: name,
-                            std: item.std,
-                            pieces: item.pieces || 0,
-                            totalDistance: toNum(item.total),
-                            totalRemainder: toNum(item.remainder) || 0,
-                            details: [item],
-                            createdAt: Date.now()
-                        });
-                    }
-                });
-
-                updatedTallies.sort((a, b) => b.createdAt - a.createdAt);
                 setSavedTallies(updatedTallies);
                 localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updatedTallies));
-                setHistory([]);
-                localStorage.removeItem('trim_calc_history_v15');
-                setCurrentProductName('');
-                showToast('右側の種類別集計にデータを追加しました');
+                
+                // 全長の値は保持し、加算入力欄のみクリア（次回テンキー押下時は新規上書き可能）
+                setAddInput('');
+                setTrimIsNewEntry(true);
+                setTrimActiveField('totalDim');
+                showToast(`【${name}】の集計に直接保存しました`);
+            };
+
+            const deleteTallyItem = (id) => {
+                const updated = savedTallies.filter(t => t.id !== id);
+                setSavedTallies(updated);
+                localStorage.setItem('trim_calc_tallies_v15', JSON.stringify(updated));
+                showToast('品名の集計を削除しました');
             };
 
             const handleTrimKeypad = (key) => {
                 if (key === 'AC') {
-                    setCurrentProductName(''); setTotalDim(''); setAddInput('');
+                    setCurrentProductName('No.1'); setTotalDim(''); setAddInput('');
                     setTrimIsNewEntry(true);
                     setTrimActiveField('totalDim');
                     return;
@@ -515,7 +502,7 @@
                     return;
                 }
                 if (key === '保存') {
-                    saveTrimToHistory();
+                    saveTrimDirectToTally();
                     return;
                 }
                 if (key === '加算') {
@@ -545,33 +532,33 @@
             };
 
             // ==========================================
-            // 3. 金物割付 (結果カードをテンキー下へ配置・右画面最大化)
+            // 3. 金物割付 (始まり寸法・チリのタップ変更対応版)
             // ==========================================
             const [kInputs, setKInputs] = useState(() => {
                 try {
-                    const saved = localStorage.getItem('kanamono_v19_text_color_sync');
+                    const saved = localStorage.getItem('kanamono_v20_start_offset');
                     if (saved) {
                         const d = JSON.parse(saved);
-                        return d.inputs || { totalLength: '', pitch: '', count: '' };
+                        return d.inputs || { totalLength: '2500', pitch: '1250', count: '3', startOffset: '0' };
                     }
                 } catch(e) {}
-                return { totalLength: '', pitch: '', count: '' };
+                return { totalLength: '2500', pitch: '1250', count: '3', startOffset: '0' };
             });
 
             const [kManualFlags, setKManualFlags] = useState(() => {
                 try {
-                    const saved = localStorage.getItem('kanamono_v19_text_color_sync');
+                    const saved = localStorage.getItem('kanamono_v20_start_offset');
                     if (saved) {
                         const d = JSON.parse(saved);
-                        return d.manualFlags || { pitch: true, count: false };
+                        return d.manualFlags || { pitch: false, count: true };
                     }
                 } catch(e) {}
-                return { pitch: true, count: false };
+                return { pitch: false, count: true };
             });
 
             const [kIsAutoMode, setKIsAutoMode] = useState(() => {
                 try {
-                    const saved = localStorage.getItem('kanamono_v19_text_color_sync');
+                    const saved = localStorage.getItem('kanamono_v20_start_offset');
                     if (saved) {
                         const d = JSON.parse(saved);
                         return d.isAutoMode ?? true;
@@ -585,7 +572,7 @@
 
             useEffect(() => {
                 try {
-                    localStorage.setItem('kanamono_v19_text_color_sync', JSON.stringify({
+                    localStorage.setItem('kanamono_v20_start_offset', JSON.stringify({
                         inputs: kInputs,
                         manualFlags: kManualFlags,
                         isAutoMode: kIsAutoMode
@@ -596,9 +583,11 @@
             const autoUpdateCount = (currInputs) => {
                 const L = parseFloat(currInputs.totalLength);
                 const W = parseFloat(currInputs.pitch);
-                if (!isNaN(L) && !isNaN(W) && W > 0) {
-                    const qty = Math.floor(L / W) + 1;
-                    return { ...currInputs, count: qty.toString() };
+                const S = parseFloat(currInputs.startOffset) || 0;
+                const effL = L - (2 * S);
+                if (!isNaN(L) && !isNaN(W) && W > 0 && effL > 0) {
+                    const qty = Math.floor(effL / W) + 1;
+                    return { ...currInputs, count: Math.max(2, qty).toString() };
                 }
                 return currInputs;
             };
@@ -606,8 +595,10 @@
             const autoUpdatePitch = (currInputs) => {
                 const L = parseFloat(currInputs.totalLength);
                 const N = parseFloat(currInputs.count);
-                if (!isNaN(L) && !isNaN(N) && N > 1) {
-                    const pitchVal = Math.floor(L / (N - 1));
+                const S = parseFloat(currInputs.startOffset) || 0;
+                const effL = L - (2 * S);
+                if (!isNaN(L) && !isNaN(N) && N > 1 && effL >= 0) {
+                    const pitchVal = Math.floor(effL / (N - 1));
                     return { ...currInputs, pitch: pitchVal.toString() };
                 }
                 return currInputs;
@@ -617,6 +608,7 @@
                 const L = parseFloat(kInputs.totalLength);
                 const W = parseFloat(kInputs.pitch);
                 const N = parseFloat(kInputs.count);
+                const S = parseFloat(kInputs.startOffset) || 0;
 
                 let resQty = "-";
                 let resQtyRem = "-";
@@ -626,31 +618,55 @@
                 let listQty = [];
                 let listWidth = [];
 
-                if (!isNaN(L)) {
-                    if (!isNaN(W) && W > 0) {
-                        const qty = Math.floor(L / W) + 1;
-                        const rem = L - (W * (qty - 1));
-                        resQty = qty.toLocaleString();
-                        resQtyRem = Math.round(rem).toLocaleString();
+                if (!isNaN(L) && L > 0) {
+                    // 両端の始まり寸法Sを考慮した内々有効寸法
+                    const effL = Math.max(0, L - (2 * S));
 
-                        let pos = rem / 2;
-                        for (let i = 0; i < qty; i++) {
-                            listQty.push(Math.round(pos));
-                            pos += W;
+                    // 1. 働き計算 (@基準)
+                    if (!isNaN(W) && W > 0) {
+                        if (effL > 0) {
+                            const qty = Math.floor(effL / W) + 1;
+                            const rem = effL - (W * (qty - 1));
+                            resQty = qty.toLocaleString();
+                            resQtyRem = Math.round(rem).toLocaleString();
+
+                            // 端振り：始まりSに余りの半分を加算して割り付け
+                            let pos = S + (rem / 2);
+                            for (let i = 0; i < qty; i++) {
+                                listQty.push(Math.round(pos));
+                                pos += W;
+                            }
+                        } else if (S > 0 && 2 * S <= L) {
+                            resQty = "2";
+                            resQtyRem = "0";
+                            listQty = [Math.round(S), Math.round(L - S)];
                         }
                     }
 
+                    // 2. 本数計算 (N基準: ユーザー要望の 100, 1250, 2400)
                     if (!isNaN(N) && N > 1) {
-                        const pitchVal = Math.floor(L / (N - 1));
-                        const rem = L - (pitchVal * (N - 1));
-                        resWidth = pitchVal.toLocaleString();
-                        resWidthRem = Math.round(rem).toLocaleString();
+                        if (effL >= 0) {
+                            const pitchVal = (N > 1) ? Math.floor(effL / (N - 1)) : 0;
+                            const rem = (N > 1) ? (effL - (pitchVal * (N - 1))) : 0;
+                            resWidth = pitchVal.toLocaleString();
+                            resWidthRem = Math.round(rem).toLocaleString();
 
-                        let pos = rem / 2;
-                        for (let i = 0; i < N; i++) {
-                            listWidth.push(Math.round(pos));
-                            pos += pitchVal;
+                            for (let i = 0; i < N; i++) {
+                                if (i === 0) {
+                                    listWidth.push(Math.round(S));
+                                } else if (i === N - 1) {
+                                    listWidth.push(Math.round(L - S));
+                                } else {
+                                    // S から (L - 2S) の区間を等分配置 (丸め誤差防止)
+                                    const pos = S + Math.round((effL * i) / (N - 1));
+                                    listWidth.push(pos);
+                                }
+                            }
                         }
+                    } else if (N === 1) {
+                        resWidth = "-";
+                        resWidthRem = "-";
+                        listWidth.push(Math.round(L / 2));
                     }
                 }
 
@@ -673,18 +689,23 @@
                 const maxRows = Math.max(listQty.length, listWidth.length);
                 const rows = [];
                 for (let i = 0; i < maxRows; i++) {
+                    const isFirst = (i === 0);
+                    const isLast = (i === maxRows - 1 && maxRows > 1);
                     rows.push({
                         no: i + 1,
+                        isFirst,
+                        isLast,
                         pitchVal: listQty[i] !== undefined ? listQty[i].toLocaleString() : '-',
                         countVal: listWidth[i] !== undefined ? listWidth[i].toLocaleString() : '-'
                     });
                 }
 
                 return {
-                    L, W, N,
+                    L, W, N, S,
                     resQty, resQtyRem, resWidth, resWidthRem,
                     mode, showPitch, showCount,
-                    rows
+                    rows,
+                    effL: Math.max(0, L - (2 * S))
                 };
             }, [kInputs, kManualFlags, kIsAutoMode]);
 
@@ -703,23 +724,24 @@
                 }
 
                 if (key === 'clearAll' || key === 'AC') {
-                    setKInputs({ totalLength: '', pitch: '', count: '' });
-                    setKManualFlags({ pitch: true, count: false });
+                    setKInputs({ totalLength: '', pitch: '', count: '', startOffset: '0' });
+                    setKManualFlags({ pitch: false, count: true });
                     setKIsOverwriteMode(true);
                     setKFocusedInputId('totalLength');
+                    showToast('金物割付のすべての入力を初期化しました');
                     return;
                 }
 
                 if (key === 'clear' || key === 'C') {
-                    setKInputs(prev => ({ ...prev, [kFocusedInputId]: '' }));
+                    setKInputs(prev => ({ ...prev, [kFocusedInputId]: (kFocusedInputId === 'startOffset' ? '0' : '') }));
                     setKIsOverwriteMode(true);
                     return;
                 }
 
                 if (key === '⏎' || key === 'enter') {
-                    if (kFocusedInputId === 'pitch') setKFocusedInputId('count');
-                    else if (kFocusedInputId === 'count') setKFocusedInputId('totalLength');
-                    else if (kFocusedInputId === 'totalLength') setKFocusedInputId('pitch');
+                    const order = ['totalLength', 'startOffset', 'pitch', 'count'];
+                    const idx = order.indexOf(kFocusedInputId);
+                    setKFocusedInputId(order[(idx + 1) % order.length]);
                     setKIsOverwriteMode(true);
                     return;
                 }
@@ -747,7 +769,7 @@
                     } else if (kFocusedInputId === 'count') {
                         updatedManual = { pitch: false, count: true };
                         updatedInputs = autoUpdatePitch(updatedInputs);
-                    } else if (kFocusedInputId === 'totalLength') {
+                    } else if (kFocusedInputId === 'totalLength' || kFocusedInputId === 'startOffset') {
                         if (updatedManual.count) updatedInputs = autoUpdatePitch(updatedInputs);
                         else updatedInputs = autoUpdateCount(updatedInputs);
                     }
@@ -957,7 +979,13 @@
             };
 
             useEffect(() => {
-                if (currentAppTab === 'slope') drawSlopeCanvas();
+                if (currentAppTab === 'slope') {
+                    // タブ切り替え直後のレイアウト計算遅延を考慮し、requestAnimationFrameで確実に描画
+                    const rafId = requestAnimationFrame(() => {
+                        drawSlopeCanvas();
+                    });
+                    return () => cancelAnimationFrame(rafId);
+                }
             }, [currentAppTab, slopeResult]);
 
             useEffect(() => {
@@ -1070,10 +1098,14 @@
             const handleCurrentKeypadRef = useRef();
             handleCurrentKeypadRef.current = handleCurrentKeypad;
 
-            // Mac物理テンキー・キーボード打鍵イベントの監視
+            // 物理キーボード対応（入力フォーム編集中はスキップするよう保護）
             useEffect(() => {
                 const handleKeyDown = (e) => {
-                    if (isClearModalOpen || isTallyClearModalOpen || wConfirmClear || isZoomOpen) return;
+                    if (isTallyClearModalOpen || wConfirmClear || isZoomOpen) return;
+
+                    // input または textarea にフォーカスがある場合はテンキー操作と干渉させない
+                    const activeTag = document.activeElement ? document.activeElement.tagName : '';
+                    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
 
                     if (e.key >= '0' && e.key <= '9') {
                         e.preventDefault();
@@ -1124,7 +1156,7 @@
 
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [currentAppTab, isClearModalOpen, isTallyClearModalOpen, wConfirmClear, isZoomOpen]);
+            }, [currentAppTab, isTallyClearModalOpen, wConfirmClear, isZoomOpen]);
 
             return (
                 <div className="flex flex-col min-h-screen">
@@ -1134,7 +1166,7 @@
                                 <span className="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                                 <span className="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                                 <span className="w-3 h-3 rounded-full bg-[#27c93f]"></span>
-                                <h1 className="text-base md:text-base font-bold text-white tracking-wide ml-1">KYOWA ROOF</h1>
+                                <h1 className="text-base font-bold text-white tracking-wide ml-1">KYOWA ROOF</h1>
                             </div>
 
                             <nav className="flex bg-[#1c1c1e] p-1 rounded-xl border border-[#2c2c2e]">
@@ -1188,9 +1220,10 @@
                                             <input
                                                 type="text"
                                                 value={wInputNo}
-                                                readOnly
-                                                className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5 pointer-events-none"
-                                                placeholder="名前、場所、番号等"
+                                                onChange={(e) => setWInputNo(e.target.value)}
+                                                onFocus={() => { setWActiveField('no'); setWIsNewEntry(false); }}
+                                                className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5"
+                                                placeholder="例: No.1"
                                             />
                                         </div>
                                         <div
@@ -1367,7 +1400,7 @@
                                         <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
                                             <div className="flex items-center gap-2">
                                                 <h3 className="text-[15px] font-bold text-white">割付履歴</h3>
-                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
+                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.5 rounded font-mono">
                                                     {wHistory.length}件
                                                 </span>
                                             </div>
@@ -1437,7 +1470,6 @@
                                             <span className="w-1.5 h-3 bg-orange-500 rounded-sm"></span>
                                             役物材料 パラメータ
                                         </h2>
-                                        <span className="text-[15px] text-zinc-400">タップして選択</span>
                                     </div>
 
                                     <div
@@ -1448,54 +1480,37 @@
                                         <input
                                             type="text"
                                             value={currentProductName}
-                                            readOnly
-                                            className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5 pointer-events-none"
-                                            placeholder="例: 水切り / 棟包み"
+                                            onChange={(e) => setCurrentProductName(e.target.value)}
+                                            onFocus={() => { setTrimActiveField('name'); setTrimIsNewEntry(false); }}
+                                            className="w-full bg-transparent text-white font-bold outline-none text-[15px] h-5"
+                                            placeholder="例: No.1"
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-1.5">
                                         <div
                                             onClick={() => { setTrimActiveField('std'); setTrimIsNewEntry(true); }}
-                                            className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'std' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
+                                            className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${trimActiveField === 'std' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[15px] font-bold text-zinc-300">材料長さ (mm)</label>
-                                            <div className="text-base font-bold font-mono text-white text-center h-5 flex items-center justify-center">
-                                                {stdLength}
+                                            <div className="flex justify-between items-center mb-0.5">
+                                                <label className="text-[15px] font-bold text-zinc-300">材料長さ (L)</label>
+                                                <span className="text-[15px] text-zinc-400 font-mono">mm</span>
                                             </div>
-                                            <div className="flex gap-1 mt-0.5">
-                                                {[2000, 2500, 3000, 4000].map(val => (
-                                                    <button
-                                                        key={val}
-                                                        type="button"
-                                                        onClick={(e) => { e.stopPropagation(); setStdLength(val.toString()); }}
-                                                        className={`flex-1 py-1 rounded text-[15px] font-bold border ${stdLength === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
-                                                    >
-                                                        {val}
-                                                    </button>
-                                                ))}
+                                            <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
+                                                {stdLength ? parseFloat(stdLength).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">3,000</span>}
                                             </div>
                                         </div>
 
                                         <div
                                             onClick={() => { setTrimActiveField('overlap'); setTrimIsNewEntry(true); }}
-                                            className={`flex flex-col gap-0.5 p-1.5 rounded-lg border transition-all cursor-pointer ${trimActiveField === 'overlap' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
+                                            className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${trimActiveField === 'overlap' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#2c2c2e] bg-[#121214]'}`}
                                         >
-                                            <label className="text-[15px] font-bold text-zinc-300">重ね代 (mm)</label>
-                                            <div className="text-base font-bold font-mono text-white text-center h-5 flex items-center justify-center">
-                                                {overlap}
+                                            <div className="flex justify-between items-center mb-0.5">
+                                                <label className="text-[15px] font-bold text-zinc-300">重ね代</label>
+                                                <span className="text-[15px] text-zinc-400 font-mono">mm</span>
                                             </div>
-                                            <div className="flex gap-1 mt-0.5">
-                                                {[30, 50, 70, 100].map(val => (
-                                                    <button
-                                                        key={val}
-                                                        type="button"
-                                                        onClick={(e) => { e.stopPropagation(); setOverlap(val.toString()); }}
-                                                        className={`flex-1 py-1 rounded text-[15px] font-bold border ${overlap === val.toString() ? 'bg-orange-500 text-black border-orange-500' : 'bg-[#1c1c1e] text-zinc-400 border-[#2c2c2e]'}`}
-                                                    >
-                                                        {val}
-                                                    </button>
-                                                ))}
+                                            <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
+                                                {overlap ? parseFloat(overlap).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">50</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -1580,26 +1595,13 @@
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {history.length > 0 && (
-                                            <div className="flex items-center justify-between bg-[#121214] px-3 py-1.5 rounded-lg border border-orange-500/40">
-                                                <span className="text-[15px] text-zinc-300">保存済み: <strong className="text-orange-400 font-mono">{history.length}件</strong></span>
-                                                <button
-                                                    type="button"
-                                                    onClick={saveHistoryTotal}
-                                                    className="btn-mac-primary text-[15px] font-bold text-black px-4 py-1.5 rounded-md flex items-center gap-1 shadow"
-                                                >
-                                                    <Icon name="save" size={13} /> 集計へ送る
-                                                </button>
-                                            </div>
-                                        )}
                                     </div>
 
                                     <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
-                                        <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
+                                        <div className="px-3.5 py-2.5 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-[15px] font-bold text-white">種類別 集計</h3>
-                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.2 rounded font-mono">
+                                                <h3 className="text-[15px] font-bold text-white">品名別 集計</h3>
+                                                <span className="text-[15px] font-bold text-orange-400 bg-orange-950/60 border border-orange-500/40 px-2 py-0.5 rounded font-mono">
                                                     {savedTallies.length}品名
                                                 </span>
                                             </div>
@@ -1618,7 +1620,7 @@
                                                 <div className="py-12 text-center text-zinc-500">
                                                     <Icon name="save" size={30} className="mx-auto mb-1 text-zinc-600" />
                                                     <p className="font-bold text-[15px]">集計データがありません</p>
-                                                    <p className="text-[15px] text-zinc-400 mt-0.5">左の「保存」後に上の「集計へ送る」を押すとここに集計されます</p>
+                                                    <p className="text-[15px] text-zinc-400 mt-0.5">左のテンキー「保存」を押すと、品名ごとに直接集計されます</p>
                                                 </div>
                                             ) : (
                                                 savedTallies.map(t => (
@@ -1628,8 +1630,10 @@
                                                             className="p-2.5 flex items-center justify-between cursor-pointer hover:bg-[#1a1a1e]"
                                                         >
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-base font-bold text-white">{t.name}</span>
-                                                                <span className="text-[15px] text-orange-400 bg-orange-950/60 border border-orange-500/40 px-1.5 py-0.2 rounded font-mono font-bold">
+                                                                <span className="text-base font-black text-amber-400 bg-amber-950/50 border border-amber-500/50 px-2.5 py-0.5 rounded shadow-sm">
+                                                                    {t.name}
+                                                                </span>
+                                                                <span className="text-[15px] text-zinc-400 font-mono">
                                                                     材料:{formatNumber(toNum(t.std))}
                                                                 </span>
                                                             </div>
@@ -1639,6 +1643,17 @@
                                                                     <span>本数: <strong className="text-green-400 font-bold">{t.pieces}本</strong></span>
                                                                     <span>端材: <strong className="text-blue-400">{formatNumber(t.totalRemainder)}</strong></span>
                                                                 </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        deleteTallyItem(t.id);
+                                                                    }}
+                                                                    className="text-zinc-500 hover:text-red-400 p-1"
+                                                                    title="この品名の集計を削除"
+                                                                >
+                                                                    <Icon name="trash" size={14} />
+                                                                </button>
                                                                 <Icon name="chevron" size={16} className={`text-zinc-500 transition-transform ${expandedTallyId === t.id ? 'rotate-180 text-orange-500' : ''}`} />
                                                             </div>
                                                         </div>
@@ -1666,7 +1681,7 @@
                             </div>
                         )}
 
-                        {/* 3. 金物割付 (結果カードをテンキー直下へ配置・右画面最大化) */}
+                        {/* 3. 金物割付 (始まり寸法タップ変更 & 均等引き機能追加) */}
                         {currentAppTab === 'kanamono' && (
                             <div className="grid grid-cols-2 gap-4 items-start">
                                 <div className="flex flex-col gap-1.5 min-w-0 bg-[#18181b] p-2.5 rounded-xl border border-[#2c2c2e] shadow-lg">
@@ -1679,10 +1694,10 @@
                                             <span className={`text-[15px] font-bold px-2.5 py-1 rounded-full border ${kIsAutoMode ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
                                                 自動連動: {kIsAutoMode ? 'ON' : 'OFF'}
                                             </span>
-                                            <span className="text-[15px] text-zinc-400">タップして選択</span>
                                         </div>
                                     </div>
 
+                                    {/* 働き (@) と 本数 (N) */}
                                     <div className="grid grid-cols-2 gap-1.5">
                                         <div
                                             onClick={() => { setKFocusedInputId('pitch'); setKIsOverwriteMode(true); }}
@@ -1717,19 +1732,38 @@
                                         </div>
                                     </div>
 
-                                    <div
-                                        onClick={() => { setKFocusedInputId('totalLength'); setKIsOverwriteMode(true); }}
-                                        className={`p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'totalLength' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#444446] bg-[#121214]'}`}
-                                    >
-                                        <div className="flex justify-between items-center mb-0.5">
-                                            <label className="text-[15px] font-black text-zinc-300">全幅 (W) - 取り付け幅</label>
-                                            <span className="text-[15px] text-orange-400 font-mono">mm</span>
+                                    {/* 全幅 (W) と 始まり寸法 (チリ) */}
+                                    <div className="grid grid-cols-3 gap-1.5">
+                                        <div
+                                            onClick={() => { setKFocusedInputId('totalLength'); setKIsOverwriteMode(true); }}
+                                            className={`col-span-2 p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'totalLength' ? 'border-orange-500 bg-orange-500/15 ring-2 ring-orange-500' : 'border-[#444446] bg-[#121214]'}`}
+                                        >
+                                            <div className="flex justify-between items-center mb-0.5">
+                                                <label className="text-[15px] font-black text-zinc-300">全幅 (W) - 取り付け幅</label>
+                                                <span className="text-[15px] text-orange-400 font-mono">mm</span>
+                                            </div>
+                                            <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
+                                                {kInputs.totalLength ? parseFloat(kInputs.totalLength).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">全幅を入力</span>}
+                                            </div>
                                         </div>
-                                        <div className="text-2xl font-black font-mono text-white text-center h-7 flex items-center justify-center">
-                                            {kInputs.totalLength ? parseFloat(kInputs.totalLength).toLocaleString('ja-JP') : <span className="text-zinc-600 text-base">全幅を入力</span>}
+
+                                        <div
+                                            onClick={() => { setKFocusedInputId('startOffset'); setKIsOverwriteMode(true); }}
+                                            className={`col-span-1 p-1.5 rounded-lg border-2 transition-all cursor-pointer ${kFocusedInputId === 'startOffset' ? 'border-amber-400 bg-amber-400/20 ring-2 ring-amber-400' : 'border-[#3a3a3c] bg-[#121214]'}`}
+                                        >
+                                            <div className="flex justify-between items-center mb-0.5">
+                                                <label className="text-[15px] font-black text-amber-300 flex items-center gap-1">
+                                                    始まり
+                                                </label>
+                                                <span className="text-[15px] text-amber-400 font-mono">mm</span>
+                                            </div>
+                                            <div className="text-2xl font-black font-mono text-amber-300 text-center h-7 flex items-center justify-center">
+                                                {kInputs.startOffset ? parseFloat(kInputs.startOffset).toLocaleString('ja-JP') : '0'}
+                                            </div>
                                         </div>
                                     </div>
 
+                                    {/* テンキー */}
                                     <div className="pt-1 border-t border-[#2c2c2e]">
                                         <div className="grid grid-cols-4 gap-1.5 bg-[#121214] p-1.5 rounded-xl border border-[#2c2c2e]">
                                             <button type="button" onClick={() => handleCurrentKeypad('7')} className="h-11 rounded-lg text-xl keypad-btn kp-large-num">7</button>
@@ -1806,14 +1840,20 @@
                                     </div>
                                 </div>
 
+                                {/* 右側：割付表 (墨出し寸法) */}
                                 <div className="flex flex-col min-w-0">
                                     <div className="bg-[#18181b] rounded-xl border border-[#2c2c2e] overflow-hidden shadow-lg flex flex-col">
-                                        <div className="px-3.5 py-2.5 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
-                                            <div className="flex items-center gap-2">
+                                        <div className="px-3.5 py-2 bg-[#242426] border-b border-[#2c2c2e] flex justify-between items-center">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <h3 className="text-[15px] font-bold text-white">割付表 (墨出し寸法)</h3>
-                                                <span className="text-[15px] font-bold text-white bg-[#121214] border border-[#3a3a3c] px-2.5 py-1 rounded font-mono">
+                                                <span className="text-[15px] font-bold text-white bg-[#121214] border border-[#3a3a3c] px-2.5 py-0.5 rounded font-mono">
                                                     全幅: <strong className="text-orange-400">{kanamonoResult.L ? kanamonoResult.L.toLocaleString() : '-'}</strong> ㎜
                                                 </span>
+                                                {kanamonoResult.S > 0 && (
+                                                    <span className="text-[15px] font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2 py-0.5 rounded font-mono">
+                                                        始まり: {kanamonoResult.S} ㎜
+                                                    </span>
+                                                )}
                                             </div>
                                             <span className="text-[15px] bg-orange-500 text-black px-2.5 py-1 rounded font-black tracking-wider shadow-sm">
                                                 墨出し寸法
@@ -1824,15 +1864,15 @@
                                             <table className="w-full text-center border-collapse text-[15px]">
                                                 <thead className="sticky top-0 bg-[#242426] text-zinc-400 border-b border-[#2c2c2e] z-10 font-bold">
                                                     <tr>
-                                                        <th className="py-2.5 px-2 w-14 border-r border-[#2c2c2e]">No.</th>
+                                                        <th className="py-2 px-2 w-16 border-r border-[#2c2c2e]">No.</th>
                                                         {kanamonoResult.showPitch && (
-                                                            <th className={`py-2.5 px-3 text-[#0a84ff] ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e] w-1/2' : 'w-full'}`}>
+                                                            <th className={`py-2 px-3 text-[#0a84ff] ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e] w-1/2' : 'w-full'}`}>
                                                                 働き計算 (@{kanamonoResult.W ? kanamonoResult.W.toLocaleString() : '-'})
                                                                 {kanamonoResult.mode === 'pitch-driven' && <span className="text-orange-400 ml-0.5">★</span>}
                                                             </th>
                                                         )}
                                                         {kanamonoResult.showCount && (
-                                                            <th className="py-2.5 px-3 text-[#30d158] w-1/2">
+                                                            <th className="py-2 px-3 text-[#30d158] w-1/2">
                                                                 本数計算 (N{kanamonoResult.N ? kanamonoResult.N.toLocaleString() : '-'})
                                                                 {kanamonoResult.mode === 'count-driven' && <span className="text-orange-400 ml-0.5">★</span>}
                                                             </th>
@@ -1847,23 +1887,32 @@
                                                             </td>
                                                         </tr>
                                                     ) : (
-                                                        kanamonoResult.rows.map(r => (
-                                                            <tr key={r.no} className="hover:bg-[#1a1a1e]">
-                                                                <td className="py-2 px-2 border-r border-[#2c2c2e] font-bold text-zinc-400 font-mono">
-                                                                    {r.no}
-                                                                </td>
-                                                                {kanamonoResult.showPitch && (
-                                                                    <td className={`py-2 px-3 font-mono font-bold text-base text-[#0a84ff] ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e]' : ''}`}>
-                                                                        {r.pitchVal}
+                                                        kanamonoResult.rows.map(r => {
+                                                            const isModified = kanamonoResult.S > 0 && (r.isFirst || r.isLast);
+                                                            return (
+                                                                <tr 
+                                                                    key={r.no} 
+                                                                    onClick={r.isFirst ? () => { setKFocusedInputId('startOffset'); setKIsOverwriteMode(true); } : undefined}
+                                                                    className={`hover:bg-[#1a1a1e] transition-colors ${r.isFirst ? 'cursor-pointer' : ''}`}
+                                                                >
+                                                                    <td className="py-2 px-2 border-r border-[#2c2c2e] font-bold text-zinc-400 font-mono">
+                                                                        {r.no}
                                                                     </td>
-                                                                )}
-                                                                {kanamonoResult.showCount && (
-                                                                    <td className="py-2 px-3 font-mono font-bold text-base text-[#30d158]">
-                                                                        {r.countVal}
-                                                                    </td>
-                                                                )}
-                                                            </tr>
-                                                        ))
+
+                                                                    {kanamonoResult.showPitch && (
+                                                                        <td className={`py-2 px-3 font-mono font-bold text-base ${kanamonoResult.showCount ? 'border-r border-[#2c2c2e]' : ''} ${isModified ? 'text-amber-300' : 'text-[#0a84ff]'}`}>
+                                                                            {r.pitchVal}
+                                                                        </td>
+                                                                    )}
+
+                                                                    {kanamonoResult.showCount && (
+                                                                        <td className={`py-2 px-3 font-mono font-bold text-base ${isModified ? 'text-amber-300' : 'text-[#30d158]'}`}>
+                                                                            {r.countVal}
+                                                                        </td>
+                                                                    )}
+                                                                </tr>
+                                                            );
+                                                        })
                                                     )}
                                                 </tbody>
                                                 <tfoot className="sticky bottom-0 bg-[#242426] border-t-2 border-[#3a3a3c] font-bold shadow-inner">
@@ -2122,19 +2171,6 @@
                         </div>
                     )}
 
-                    {isClearModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-                            <div className="bg-[#1c1c20] border border-[#3e3e44] rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
-                                <h3 className="text-lg font-bold text-white">役物履歴の全削除</h3>
-                                <p className="text-base text-zinc-400">保存された役物履歴をすべて削除します。よろしいですか？</p>
-                                <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setIsClearModalOpen(false)} className="flex-1 py-3 rounded-xl font-bold btn-mac-silver text-white">キャンセル</button>
-                                    <button onClick={() => { setHistory([]); localStorage.removeItem('trim_calc_history_v15'); setIsClearModalOpen(false); }} className="flex-1 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white">削除する</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {isTallyClearModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
                             <div className="bg-[#1c1c20] border border-[#3e3e44] rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
@@ -2153,13 +2189,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-    <script>
-    if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(console.error);
-        });
-    }
     </script>
 </body>
 </html>

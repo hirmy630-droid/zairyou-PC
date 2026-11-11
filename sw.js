@@ -1,105 +1,62 @@
-const CACHE_NAME = 'zairyo-pc-mac-pwa-v20261111';
-const CORE_ASSETS = [
-  './',
-  './index.html',
-  './index.html?pwa=20261111',
-  './manifest.json',
-  './manifest.json?v=20261111',
-  './sw.js'
-];
+// KYOWA ROOF - Service Worker（オフライン対応）
+// 仕組み: 初回オンライン時に必要なファイルを端末へ保存 → 以降は電波がなくても起動できる。
+// 同一サイトのファイルは「保存済みを即表示しつつ、裏で最新版に更新」する方式。
+const CACHE = 'kyowa-roof-v1';
+const TAILWIND = 'https://cdn.tailwindcss.com/3.4.17';
+const LOCAL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-180.png'];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    // 一部のファイル（アイコン等）が無くてもインストール自体は失敗させない
+    await Promise.all(LOCAL.map(async (url) => {
+      try {
+        const res = await fetch(url, { cache: 'reload' });
+        if (res.ok) await cache.put(url, res);
+      } catch (e) {}
+    }));
+    // Tailwind は他サイトのスクリプト（opaque 応答）なので no-cors で保存
+    try {
+      const res = await fetch(new Request(TAILWIND, { mode: 'no-cors' }));
+      await cache.put(TAILWIND, res);
+    } catch (e) {}
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      await Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      );
-      await self.clients.claim();
-    })()
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
-
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
-
-function isSameOrigin(request) {
-  return new URL(request.url).origin === self.location.origin;
-}
-
-function isNavigationRequest(request) {
-  return request.mode === 'navigate';
-}
-
-function isCriticalAsset(request) {
-  const url = new URL(request.url);
-  return isSameOrigin(request) && (
-    url.pathname.endsWith('/index.html') ||
-    url.pathname.endsWith('/manifest.json') ||
-    url.pathname.endsWith('/sw.js')
-  );
-}
-
-function isStaticAsset(request) {
-  const url = new URL(request.url);
-  return isSameOrigin(request) && /\.(?:png|jpg|jpeg|webp|svg|gif|ico)$/.test(url.pathname);
-}
-
-async function networkFirst(request, fallbackPath = './index.html') {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response && response.ok) {
-      cache.put(request, response.clone()).catch(() => {});
-    }
-    return response;
-  } catch (error) {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    return cache.match(fallbackPath);
-  }
-}
-
-async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  const response = await fetch(request);
-  if (response && response.ok) {
-    cache.put(request, response.clone()).catch(() => {});
-  }
-  return response;
-}
 
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  if (request.method !== 'GET') return;
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  const isTailwind = req.url === TAILWIND;
+  if (url.origin !== self.location.origin && !isTailwind) return;
 
-  if (!isSameOrigin(request)) {
-    return;
-  }
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(req, { ignoreSearch: true });
+    const network = fetch(req).then((res) => {
+      if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+      return res;
+    }).catch(() => null);
 
-  if (isNavigationRequest(request) || isCriticalAsset(request)) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  if (isStaticAsset(request)) {
-    event.respondWith(cacheFirst(request));
-    return;
-  }
-
-  event.respondWith(networkFirst(request));
+    if (cached) {
+      if (!isTailwind) event.waitUntil(network); // 裏で最新版に更新
+      return cached;
+    }
+    const res = await network;
+    if (res) return res;
+    if (req.mode === 'navigate') {
+      const fallback = await cache.match('./index.html');
+      if (fallback) return fallback;
+    }
+    return Response.error();
+  })());
 });
